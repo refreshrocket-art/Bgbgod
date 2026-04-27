@@ -2,110 +2,99 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Idle NBA Final Form Sim</title>
+<title>Idle NBA Mobile Sim</title>
 <style>
-body { background:#0b0b0b; color:#eee; font-family:Arial; margin:0;}
-#nav { background:#1a1a1a; padding:10px;}
-button { margin:3px; padding:6px;}
-.section { display:none; padding:15px;}
-.active { display:block;}
-.badge { padding:4px; margin:2px; border:1px solid #555;}
+body {
+  margin:0;
+  font-family:Arial;
+  background:#0f0f0f;
+  color:#eee;
+}
+
+#nav {
+  display:flex;
+  flex-wrap:wrap;
+  position:sticky;
+  top:0;
+  background:#1a1a1a;
+  padding:5px;
+  z-index:10;
+}
+
+#nav button {
+  flex:1 1 30%;
+  margin:3px;
+  padding:8px;
+  font-size:12px;
+}
+
+.section {
+  padding:10px;
+}
+
+.statBtn {
+  padding:3px 6px;
+  margin-left:5px;
+}
+
+.card {
+  background:#1c1c1c;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+}
+
+.badge {
+  border:1px solid #555;
+  padding:4px;
+  margin:2px;
+  display:inline-block;
+}
 </style>
 </head>
 <body>
 
 <div id="nav">
-<button onclick="show('career')">Career</button>
-<button onclick="show('train')">Training</button>
-<button onclick="show('season')">Season</button>
-<button onclick="show('playoffs')">Playoffs</button>
-<button onclick="show('fa')">Free Agency</button>
-<button onclick="show('stats')">Stats</button>
+<button onclick="setTab('career')">Career</button>
+<button onclick="setTab('train')">Train</button>
+<button onclick="setTab('season')">Season</button>
+<button onclick="setTab('playoffs')">Playoffs</button>
+<button onclick="setTab('fa')">FA</button>
+<button onclick="setTab('stats')">Stats</button>
+<button onclick="toggleGod()">God</button>
 </div>
 
-<div id="career" class="section active">
-<h2>Career</h2>
-<button onclick="enterLeague()">Enter NBA</button>
-<p id="teamInfo"></p>
-<p id="contractInfo"></p>
-<p id="ageInfo"></p>
-</div>
-
-<div id="train" class="section">
-<h2>Training</h2>
-<p>TP: <span id="tp"></span></p>
-<div id="statsList"></div>
-</div>
-
-<div id="season" class="section">
-<h2>Season</h2>
-<p id="seasonInfo"></p>
-<button onclick="playGame()">Play Game</button>
-<button onclick="simSeason()">Sim Season</button>
-<div id="standings"></div>
-</div>
-
-<div id="playoffs" class="section">
-<h2>Playoffs</h2>
-<div id="playoffLog"></div>
-</div>
-
-<div id="fa" class="section">
-<h2>Free Agency</h2>
-<div id="offers"></div>
-</div>
-
-<div id="stats" class="section">
-<h2>Stats</h2>
-<p>OVR: <span id="ovr"></span></p>
-<p>PPG: <span id="ppg"></span></p>
-<p>Efficiency: <span id="eff"></span></p>
-<p>Rings: <span id="rings"></span></p>
-<p>Age: <span id="age"></span></p>
-
-<h3>Badges</h3>
-<div id="badges"></div>
-
-<h3>Awards</h3>
-<div id="awards"></div>
-</div>
+<div id="app"></div>
 
 <script>
 
 // ===== DATA =====
-const TEAM_NAMES = Array.from({length:30},(_,i)=>"Franchise "+(i+1));
+const TEAMS = Array.from({length:20},(_,i)=>"Team "+(i+1));
 
 let game = {
+tab:"career",
 team:null,
 age:18,
-contract:{years:0,salary:0},
-tp:20,
+god:false,
+tp:15,
 season:1,
 gameNum:0,
 wins:0,
 losses:0,
 rings:0,
 injury:0,
+contract:{years:0,salary:0},
+stats:{Speed:65,Three:65,Defense:65,Passing:65},
+career:{pts:0,games:0},
 badges:[],
 awards:[],
-stats:{
-Speed:65,Strength:65,Three:65,Defense:65,Passing:65,IQ:65
-},
-career:{pts:0,games:0},
 league:[]
 };
 
-// ===== STORAGE =====
-function save(){localStorage.setItem("nbaFinal",JSON.stringify(game));}
-function load(){let d=localStorage.getItem("nbaFinal"); if(d) game=JSON.parse(d);}
+// ===== SAVE =====
+function save(){localStorage.setItem("mobileNBA",JSON.stringify(game));}
+function load(){let d=localStorage.getItem("mobileNBA"); if(d) game=JSON.parse(d);}
 load();
-
-// ===== NAV =====
-function show(id){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-render();
-}
 
 // ===== CORE =====
 function calcOVR(){
@@ -113,95 +102,65 @@ let v=Object.values(game.stats);
 return Math.floor(v.reduce((a,b)=>a+b)/v.length);
 }
 
+function setTab(t){game.tab=t; render();}
+
 // ===== LEAGUE =====
 function createLeague(){
-game.league = TEAM_NAMES.map(n=>({
-name:n,
+game.league = TEAMS.map(t=>({
+name:t,
 wins:0,
 losses:0,
-rosterAvg:Math.random()*20+65,
-salary:Math.random()*120
+power:Math.random()*20+70
 }));
 }
 
 // ===== START =====
 function enterLeague(){
 createLeague();
-signContract(randomTeam(),3);
-}
-
-function randomTeam(){
-return game.league[Math.floor(Math.random()*game.league.length)];
-}
-
-// ===== CONTRACT =====
-function signContract(team,years){
-game.team=team.name;
-game.contract.years=years;
-game.contract.salary=Math.floor(calcOVR()*120000);
+let t = game.league[Math.floor(Math.random()*game.league.length)];
+game.team=t.name;
+game.contract={years:2,salary:calcOVR()*100000};
 }
 
 // ===== TRAIN =====
 function upgrade(stat){
-if(game.tp>0 && game.stats[stat]<99){
+if(game.tp>0||game.god){
+if(game.stats[stat]<99){
 game.stats[stat]++;
-game.tp--;
+if(!game.god) game.tp--;
 }
-}
-
-// ===== BADGES =====
-function updateBadges(){
-if(calcOVR()>85 && !game.badges.includes("All-Star")){
-game.badges.push("All-Star");
-}
-if(game.stats.Three>90 && !game.badges.includes("Sniper")){
-game.badges.push("Sniper (+shooting boost)");
-}
-if(game.stats.Defense>90 && !game.badges.includes("Lockdown")){
-game.badges.push("Lockdown (+defense boost)");
 }
 }
 
-// ===== GAME SIM =====
+// ===== GAME =====
 function playGame(){
-if(game.injury>0){
-game.injury--;
-game.gameNum++;
-return;
-}
+if(game.injury>0){game.injury--; game.gameNum++; return;}
 
 if(game.gameNum>=82){startPlayoffs(); return;}
 
 let team = game.league.find(t=>t.name===game.team);
-let opp = randomTeam();
+let opp = game.league[Math.floor(Math.random()*game.league.length)];
 
-let badgeBoost = game.badges.includes("Sniper")?10:0;
+let boost = game.badges.includes("Sniper")?10:0;
 
-let performance = calcOVR() + badgeBoost - (game.age>32?10:0);
-
-let myScore = Math.random()*90 + performance;
-let oppScore = Math.random()*100 + opp.rosterAvg;
+let myScore = calcOVR()+boost+Math.random()*40;
+let oppScore = opp.power+Math.random()*40;
 
 if(myScore>oppScore){game.wins++; team.wins++;}
 else {game.losses++; team.losses++;}
 
 game.career.pts+=Math.floor(myScore/2);
 game.career.games++;
-
-if(Math.random()<0.05){
-game.injury = Math.floor(Math.random()*5)+1;
-}
-
 game.tp+=1;
 game.gameNum++;
 
-simulateLeague();
-updateBadges();
+if(Math.random()<0.05){game.injury=2;}
 
-render();
+updateBadges();
+simulateLeague();
 }
 
-// ===== LEAGUE SIM =====
+// ===== SIM =====
 function simulateLeague(){
 game.league.forEach(t=>{
 if(t.name!==game.team){
@@ -210,88 +169,53 @@ Math.random()>0.5?t.wins++:t.losses++;
 });
 }
 
-// ===== SEASON =====
-function simSeason(){
-while(game.gameNum<82) playGame();
-}
-
 // ===== PLAYOFFS =====
 function startPlayoffs(){
-let ranked=[...game.league].sort((a,b)=>b.wins-a.wins).slice(0,16);
+let ranked=[...game.league].sort((a,b)=>b.wins-a.wins).slice(0,8);
+let me=ranked.find(t=>t.name===game.team);
 
-let myTeam=ranked.find(t=>t.name===game.team);
 let log="";
+if(!me){log="Missed Playoffs"; endSeason(); renderPlayoffs(log); return;}
 
-if(!myTeam){
-log="Missed playoffs";
-document.getElementById("playoffLog").innerHTML=log;
-endSeason();
-return;
+for(let r=1;r<=3;r++){
+let w=0,l=0;
+while(w<4&&l<4){
+Math.random()<calcOVR()/120?w++:l++;
 }
-
-for(let r=1;r<=4;r++){
-let wins=0,losses=0;
-
-while(wins<4 && losses<4){
-let adv = calcOVR()/120;
-if(Math.random()<adv) wins++; else losses++;
-}
-
-log+=`Round ${r}: ${wins}-${losses}<br>`;
-
-if(losses===4){
-document.getElementById("playoffLog").innerHTML=log;
-endSeason();
-return;
-}
+log+=`R${r}: ${w}-${l}<br>`;
+if(l===4){renderPlayoffs(log); endSeason(); return;}
 }
 
 game.rings++;
-game.awards.push("Champion S"+game.season);
-
-document.getElementById("playoffLog").innerHTML=log+"🏆 Champion";
-
+log+="🏆 Champion";
+renderPlayoffs(log);
 endSeason();
 }
 
-// ===== FREE AGENCY =====
+function renderPlayoffs(log){
+document.getElementById("app").innerHTML=`<div class="card">${log}</div>`;
+}
+
+// ===== FA =====
 function generateOffers(){
-let offers = game.league.map(t=>{
-let value = calcOVR() + Math.random()*20;
-return {
+let offers = game.league.map(t=>({
 team:t.name,
-salary:Math.floor(value*100000),
-years:Math.floor(Math.random()*4)+1
-};
-});
+salary:Math.floor((t.power+Math.random()*20)*100000),
+years:Math.floor(Math.random()*3)+1
+}));
 
-let top = offers.sort((a,b)=>b.salary-a.salary).slice(0,5);
+offers.sort((a,b)=>b.salary-a.salary);
 
-document.getElementById("offers").innerHTML = top.map(o=>
-`<div>${o.team} - $${o.salary} (${o.years}y)
-<button onclick="acceptOffer('${o.team}',${o.years},${o.salary})">Sign</button></div>`
-).join("");
+return offers.slice(0,3);
 }
 
-function acceptOffer(team,years,salary){
-game.team=team;
-game.contract={years,salary};
+function sign(o){
+game.team=o.team;
+game.contract={years:o.years,salary:o.salary};
 }
 
-// ===== TRADES =====
-function tradeAI(){
-if(Math.random()<0.2){
-let newTeam = randomTeam();
-game.team=newTeam.name;
-alert("Trade! You were moved to "+newTeam.name);
-}
-}
-
-// ===== END SEASON =====
+// ===== END =====
 function endSeason(){
-awardCheck();
-tradeAI();
-
 game.age++;
 game.season++;
 game.gameNum=0;
@@ -300,56 +224,97 @@ game.losses=0;
 game.contract.years--;
 
 if(game.contract.years<=0){
-generateOffers();
-show('fa');
+game.offers=generateOffers();
+game.tab="fa";
 }
-
 createLeague();
 }
 
-// ===== AWARDS =====
-function awardCheck(){
-let ppg = game.career.pts/(game.career.games||1);
-if(ppg>28) game.awards.push("MVP S"+game.season);
+// ===== BADGES =====
+function updateBadges(){
+if(game.stats.Three>90 && !game.badges.includes("Sniper")){
+game.badges.push("Sniper");
+}
+if(calcOVR()>85 && !game.badges.includes("Star")){
+game.badges.push("Star");
+}
+}
+
+// ===== GOD =====
+function toggleGod(){
+game.god=!game.god;
+alert("God Mode: "+(game.god?"ON":"OFF"));
 }
 
 // ===== UI =====
 function render(){
-document.getElementById("teamInfo").innerText="Team: "+(game.team||"None");
-document.getElementById("contractInfo").innerText=
-`Contract: ${game.contract.years} yrs | $${game.contract.salary}`;
-document.getElementById("ageInfo").innerText="Age: "+game.age;
+let html="";
 
-document.getElementById("tp").innerText=game.tp;
+if(game.tab==="career"){
+html+=`
+<div class="card">
+<button onclick="enterLeague()">Enter NBA</button>
+<p>Team: ${game.team||"None"}</p>
+<p>Age: ${game.age}</p>
+<p>Contract: ${game.contract.years}y | $${game.contract.salary}</p>
+</div>`;
+}
 
-document.getElementById("statsList").innerHTML=
-Object.keys(game.stats).map(s=>
-`${s}: ${game.stats[s]} <button onclick="upgrade('${s}')">+</button>`
-).join("<br>");
+if(game.tab==="train"){
+html+=`<div class="card">TP: ${game.tp}</div>`;
+Object.keys(game.stats).forEach(s=>{
+html+=`<div class="card">${s}: ${game.stats[s]}
+<button class="statBtn" onclick="upgrade('${s}')">+</button></div>`;
+});
+}
 
-document.getElementById("seasonInfo").innerText=
-`Season ${game.season} | ${game.wins}-${game.losses} | Game ${game.gameNum}/82 | Injury: ${game.injury}`;
+if(game.tab==="season"){
+html+=`
+<div class="card">
+Season ${game.season} | ${game.wins}-${game.losses}<br>
+Game ${game.gameNum}/82 | Injury: ${game.injury}
+</div>
+<button onclick="playGame()">Play</button>
+<button onclick="simSeason()">Sim</button>
+`;
 
-document.getElementById("standings").innerHTML=
-[...game.league].sort((a,b)=>b.wins-a.wins)
-.slice(0,10)
-.map(t=>`${t.name} ${t.wins}-${t.losses}`)
-.join("<br>");
+html+=`<div class="card">Standings:<br>`;
+[...game.league].sort((a,b)=>b.wins-a.wins).slice(0,5)
+.forEach(t=>{html+=`${t.name} ${t.wins}-${t.losses}<br>`});
+html+=`</div>`;
+}
 
+if(game.tab==="fa"){
+html+=`<div class="card">Offers:<br>`;
+(game.offers||[]).forEach(o=>{
+html+=`${o.team} $${o.salary} (${o.years}y)
+<button onclick='sign(${JSON.stringify(o)})'>Sign</button><br>`;
+});
+html+=`</div>`;
+}
+
+if(game.tab==="stats"){
 let g=game.career.games||1;
+html+=`
+<div class="card">
+OVR: ${calcOVR()}<br>
+PPG: ${(game.career.pts/g).toFixed(1)}<br>
+Rings: ${game.rings}
+</div>`;
 
-document.getElementById("ovr").innerText=calcOVR();
-document.getElementById("ppg").innerText=(game.career.pts/g).toFixed(1);
-document.getElementById("eff").innerText=(calcOVR()/g*10).toFixed(2);
-document.getElementById("rings").innerText=game.rings;
-document.getElementById("age").innerText=game.age;
+html+=`<div class="card">Badges:<br>`;
+game.badges.forEach(b=>html+=`<span class="badge">${b}</span>`);
+html+=`</div>`;
+}
 
-document.getElementById("badges").innerHTML=
-game.badges.map(b=>`<div class="badge">${b}</div>`).join("");
-
-document.getElementById("awards").innerText=game.awards.join(", ");
-
+document.getElementById("app").innerHTML=html;
 save();
+}
+
+// ===== SIM SEASON =====
+function simSeason(){
+while(game.gameNum<82) playGame();
+render();
 }
 
 render();
