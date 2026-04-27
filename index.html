@@ -1,671 +1,359 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NBA 2K26 STYLE: BASKETBALL CAREER IDLE SIM</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        body {
-            background: linear-gradient(145deg, #0a1f1e 0%, #071513 100%);
-            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #f0f3f8;
-        }
-
-        /* main game container */
-        .game-container {
-            max-width: 1400px;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(3px);
-            border-radius: 48px;
-            padding: 20px 24px;
-            box-shadow: 0 25px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,215,0,0.3);
-        }
-
-        /* header / career status */
-        .career-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
-            background: #00000066;
-            padding: 12px 18px;
-            border-radius: 60px;
-            border-left: 5px solid gold;
-        }
-
-        .career-stage {
-            font-size: 1.6rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #FFD966, #FFA500);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 4px #ffb347;
-        }
-
-        .record-badge {
-            background: #1e2a2a;
-            padding: 6px 14px;
-            border-radius: 32px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        /* stat grid */
-        .stats-panel {
-            background: #11181cee;
-            border-radius: 32px;
-            padding: 18px;
-            margin-bottom: 24px;
-            backdrop-filter: blur(4px);
-        }
-
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            margin-top: 12px;
-        }
-
-        .stat-card {
-            background: #0f1219;
-            border-radius: 28px;
-            padding: 10px 8px;
-            text-align: center;
-            transition: 0.1s;
-            border: 1px solid #ffcd7e30;
-        }
-
-        .stat-name {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #aaa;
-        }
-
-        .stat-value {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: #ffd966;
-        }
-
-        .stat-progress {
-            font-size: 0.7rem;
-            color: #8bc34a;
-        }
-
-        /* training zone */
-        .training-area {
-            background: #081c1cee;
-            border-radius: 36px;
-            padding: 20px;
-            margin-bottom: 24px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
-        }
-
-        .active-training {
-            flex: 2;
-            min-width: 180px;
-        }
-
-        .train-btn {
-            background: radial-gradient(circle at 30% 10%, #ffb347, #ff8c00);
-            border: none;
-            font-size: 1.3rem;
-            font-weight: bold;
-            padding: 16px 24px;
-            border-radius: 60px;
-            width: 100%;
-            color: #1e2a2a;
-            cursor: pointer;
-            transition: 0.07s linear;
-            box-shadow: 0 8px 0 #a35100;
-            font-family: inherit;
-        }
-        .train-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #a35100;
-        }
-
-        .intensity-slider {
-            margin-top: 18px;
-        }
-
-        .resource-bar {
-            background: #000000aa;
-            border-radius: 28px;
-            padding: 12px 18px;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        /* achievements */
-        .achievements-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 12px;
-            max-height: 140px;
-            overflow-y: auto;
-        }
-
-        .achievement {
-            background: #2a2418;
-            border-radius: 40px;
-            font-size: 0.7rem;
-            padding: 6px 12px;
-            gap: 6px;
-            display: inline-flex;
-            align-items: center;
-        }
-        .achievement.unlocked {
-            background: #ffb347;
-            color: #1e1a0a;
-            font-weight: bold;
-        }
-
-        button {
-            background: #2c3e2f;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 32px;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .decision-panel {
-            background: #000000aa;
-            border-radius: 28px;
-            padding: 16px;
-            margin: 16px 0;
-            border: 2px solid gold;
-        }
-
-        .log {
-            background: #0b1217;
-            border-radius: 24px;
-            height: 110px;
-            overflow-y: auto;
-            font-size: 0.7rem;
-            padding: 10px;
-            font-family: monospace;
-        }
-
-        @media (max-width: 700px) {
-            .game-container {
-                padding: 12px;
-            }
-            .stat-value {
-                font-size: 1.2rem;
-            }
-            .train-btn {
-                padding: 12px 16px;
-                font-size: 1rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Idle NBA Final Form Sim</title>
+<style>
+body { background:#0b0b0b; color:#eee; font-family:Arial; margin:0;}
+#nav { background:#1a1a1a; padding:10px;}
+button { margin:3px; padding:6px;}
+.section { display:none; padding:15px;}
+.active { display:block;}
+.badge { padding:4px; margin:2px; border:1px solid #555;}
+</style>
 </head>
 <body>
-<div class="game-container" id="gameRoot">
-    <!-- dynamic content will be rendered by js, but we attach via react-less dom manipulation -->
+
+<div id="nav">
+<button onclick="show('career')">Career</button>
+<button onclick="show('train')">Training</button>
+<button onclick="show('season')">Season</button>
+<button onclick="show('playoffs')">Playoffs</button>
+<button onclick="show('fa')">Free Agency</button>
+<button onclick="show('stats')">Stats</button>
+</div>
+
+<div id="career" class="section active">
+<h2>Career</h2>
+<button onclick="enterLeague()">Enter NBA</button>
+<p id="teamInfo"></p>
+<p id="contractInfo"></p>
+<p id="ageInfo"></p>
+</div>
+
+<div id="train" class="section">
+<h2>Training</h2>
+<p>TP: <span id="tp"></span></p>
+<div id="statsList"></div>
+</div>
+
+<div id="season" class="section">
+<h2>Season</h2>
+<p id="seasonInfo"></p>
+<button onclick="playGame()">Play Game</button>
+<button onclick="simSeason()">Sim Season</button>
+<div id="standings"></div>
+</div>
+
+<div id="playoffs" class="section">
+<h2>Playoffs</h2>
+<div id="playoffLog"></div>
+</div>
+
+<div id="fa" class="section">
+<h2>Free Agency</h2>
+<div id="offers"></div>
+</div>
+
+<div id="stats" class="section">
+<h2>Stats</h2>
+<p>OVR: <span id="ovr"></span></p>
+<p>PPG: <span id="ppg"></span></p>
+<p>Efficiency: <span id="eff"></span></p>
+<p>Rings: <span id="rings"></span></p>
+<p>Age: <span id="age"></span></p>
+
+<h3>Badges</h3>
+<div id="badges"></div>
+
+<h3>Awards</h3>
+<div id="awards"></div>
 </div>
 
 <script>
-    // ---------- NBA 2K26 Inspired STATS + caps based on real progression ----------
-    const STATS_LIST = [
-        { id: "ball_handle", name: "BALL HANDLE", minCap: 40, maxCapHS: 72, maxCapCollege: 82, maxCapNBA: 99, base: 48 },
-        { id: "three_pt", name: "3PT SHOT", minCap: 35, maxCapHS: 70, maxCapCollege: 80, maxCapNBA: 99, base: 45 },
-        { id: "defense", name: "DEFENSE", minCap: 38, maxCapHS: 68, maxCapCollege: 80, maxCapNBA: 99, base: 46 },
-        { id: "strength", name: "STRENGTH", minCap: 40, maxCapHS: 72, maxCapCollege: 82, maxCapNBA: 99, base: 50 },
-        { id: "speed", name: "SPEED", minCap: 45, maxCapHS: 76, maxCapCollege: 85, maxCapNBA: 99, base: 52 },
-        { id: "stamina", name: "STAMINA", minCap: 50, maxCapHS: 78, maxCapCollege: 86, maxCapNBA: 99, base: 55 }
-    ];
 
-    // career phases
-    const PHASE = { HS: "highschool", COLLEGE: "college", NBA: "nba" };
+// ===== DATA =====
+const TEAM_NAMES = Array.from({length:30},(_,i)=>"Franchise "+(i+1));
 
-    // Achievements DB (real NBA records/milestone inspired)
-    const ACHIEVEMENTS_DB = [
-        { id: "hs_legend", name: "🏆 HS State Champ", threshold: (p) => p.phase === PHASE.HS && getOverallRating(p.stats) >= 70, unlocked: false },
-        { id: "college_star", name: "🎓 NCAA All-American", threshold: (p) => p.phase === PHASE.COLLEGE && getOverallRating(p.stats) >= 78, unlocked: false },
-        { id: "nba_allstar", name: "⭐ NBA All-Star", threshold: (p) => p.phase === PHASE.NBA && getOverallRating(p.stats) >= 85, unlocked: false },
-        { id: "triple_double", name: "🎯 Triple-Double Machine", threshold: (p) => p.careerStats.tripleDoubles >= 5, unlocked: false },
-        { id: "three_king", name: "🔥 3PT Record", threshold: (p) => p.stats.three_pt >= 92, unlocked: false },
-        { id: "mvp_season", name: "🏅 NBA MVP", threshold: (p) => p.phase === PHASE.NBA && getOverallRating(p.stats) >= 90, unlocked: false },
-        { id: "hof_legacy", name: "👑 Hall of Fame", threshold: (p) => p.careerStats.totalPoints >= 20000 && p.phase === PHASE.NBA, unlocked: false },
-        { id: "scoring_champ", name: "📊 Scoring Leader", threshold: (p) => p.careerStats.totalPoints >= 10000, unlocked: false }
-    ];
+let game = {
+team:null,
+age:18,
+contract:{years:0,salary:0},
+tp:20,
+season:1,
+gameNum:0,
+wins:0,
+losses:0,
+rings:0,
+injury:0,
+badges:[],
+awards:[],
+stats:{
+Speed:65,Strength:65,Three:65,Defense:65,Passing:65,IQ:65
+},
+career:{pts:0,games:0},
+league:[]
+};
 
-    // player default state
-    let player = {
-        phase: PHASE.HS,            // highschool start
-        stats: {},
-        skillPoints: 0,             // idle resource for training
-        lastTimestamp: Date.now(),
-        careerStats: {
-            totalPoints: 320,       // base highschool points
-            tripleDoubles: 0,
-            seasonsPlayed: 0,
-            bestOverall: 0
-        },
-        achievements: ACHIEVEMENTS_DB.map(a => ({ ...a, unlocked: false })),
-        decisionMade: false,        // for HS->college or pro
-        intensity: 1.0,            // training multiplier 0.5 to 2.0
-        // additional earned badges placeholder
-        logEntries: ["🏀 Welcome! Train & idle to climb ranks. Start in High School."]
-    };
+// ===== STORAGE =====
+function save(){localStorage.setItem("nbaFinal",JSON.stringify(game));}
+function load(){let d=localStorage.getItem("nbaFinal"); if(d) game=JSON.parse(d);}
+load();
 
-    // helper: get current stat cap based on phase
-    function getStatCap(statId) {
-        const statDef = STATS_LIST.find(s => s.id === statId);
-        if (!statDef) return 99;
-        if (player.phase === PHASE.HS) return statDef.maxCapHS;
-        if (player.phase === PHASE.COLLEGE) return statDef.maxCapCollege;
-        return statDef.maxCapNBA;
-    }
+// ===== NAV =====
+function show(id){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+render();
+}
 
-    // initialize stats with base values respecting caps
-    function initStats() {
-        let stats = {};
-        STATS_LIST.forEach(s => {
-            let baseVal = s.base;
-            if (player.phase === PHASE.HS) baseVal = Math.min(baseVal, s.maxCapHS);
-            if (player.phase === PHASE.COLLEGE) baseVal = Math.min(baseVal, s.maxCapCollege);
-            stats[s.id] = baseVal;
-        });
-        return stats;
-    }
+// ===== CORE =====
+function calcOVR(){
+let v=Object.values(game.stats);
+return Math.floor(v.reduce((a,b)=>a+b)/v.length);
+}
 
-    if (!player.stats || Object.keys(player.stats).length === 0) player.stats = initStats();
+// ===== LEAGUE =====
+function createLeague(){
+game.league = TEAM_NAMES.map(n=>({
+name:n,
+wins:0,
+losses:0,
+rosterAvg:Math.random()*20+65,
+salary:Math.random()*120
+}));
+}
 
-    // overall rating (0-99 style)
-    function getOverallRating(stats) {
-        let sum = 0;
-        STATS_LIST.forEach(s => { sum += stats[s.id] || 50; });
-        return Math.floor(sum / STATS_LIST.length);
-    }
+// ===== START =====
+function enterLeague(){
+createLeague();
+signContract(randomTeam(),3);
+}
 
-    // add log message
-    function addLog(msg) {
-        player.logEntries.unshift(msg);
-        if (player.logEntries.length > 18) player.logEntries.pop();
-    }
+function randomTeam(){
+return game.league[Math.floor(Math.random()*game.league.length)];
+}
 
-    // update career milestones & achievements
-    function updateAchievements() {
-        let changed = false;
-        player.achievements.forEach(ach => {
-            if (!ach.unlocked && ach.threshold(player)) {
-                ach.unlocked = true;
-                addLog(`🏅 ACHIEVEMENT UNLOCKED: ${ach.name}`);
-                changed = true;
-            }
-        });
-        // bonus: overall career best tracking
-        let ovr = getOverallRating(player.stats);
-        if (ovr > player.careerStats.bestOverall) {
-            player.careerStats.bestOverall = ovr;
-            addLog(`📈 New CAREER HIGH overall: ${ovr}`);
-        }
-        return changed;
-    }
+// ===== CONTRACT =====
+function signContract(team,years){
+game.team=team.name;
+game.contract.years=years;
+game.contract.salary=Math.floor(calcOVR()*120000);
+}
 
-    // idle progression handler (time-based skill points)
-    function updateIdleProgress() {
-        const now = Date.now();
-        let elapsed = Math.min(now - player.lastTimestamp, 3600000); // max 1 hour idle
-        if (elapsed <= 0) return;
-        // passive skill points: based on intensity & phase multiplier (HS slower, NBA faster)
-        let baseRatePerSec = 0.045;  // points per sec
-        if (player.phase === PHASE.COLLEGE) baseRatePerSec = 0.06;
-        if (player.phase === PHASE.NBA) baseRatePerSec = 0.085;
-        let intensityBonus = Math.max(0.5, Math.min(2.2, player.intensity));
-        let gained = elapsed / 1000 * baseRatePerSec * intensityBonus;
-        gained = Math.floor(gained * 10) / 10;
-        if (gained > 0.05) {
-            player.skillPoints += gained;
-            player.skillPoints = Math.floor(player.skillPoints * 10) / 10;
-            addLog(`⏳ Idle gain: +${gained.toFixed(1)} SP (while away)`);
-        }
-        player.lastTimestamp = now;
-        saveToLocal();
-    }
+// ===== TRAIN =====
+function upgrade(stat){
+if(game.tp>0 && game.stats[stat]<99){
+game.stats[stat]++;
+game.tp--;
+}
+}
 
-    // training (active click)
-    function activeTrain() {
-        let baseGain = 0.8 + Math.random() * 0.9;
-        let intensityMult = Math.max(0.5, Math.min(2.2, player.intensity));
-        let phaseMult = 1.0;
-        if (player.phase === PHASE.HS) phaseMult = 0.9;
-        if (player.phase === PHASE.COLLEGE) phaseMult = 1.1;
-        if (player.phase === PHASE.NBA) phaseMult = 1.35;
-        let gain = baseGain * intensityMult * phaseMult;
-        player.skillPoints += gain;
-        player.skillPoints = Math.floor(player.skillPoints * 10) / 10;
-        addLog(`💪 Active training! +${gain.toFixed(1)} Skill Points`);
-        // small chance for triple double narrative
-        if (Math.random() < 0.05 && player.phase === PHASE.NBA) {
-            player.careerStats.tripleDoubles += 1;
-            addLog(`✨ TRIPLE-DOUBLE performance! Career total: ${player.careerStats.tripleDoubles}`);
-            updateAchievements();
-        }
-        saveToLocal();
-        renderGame();
-    }
+// ===== BADGES =====
+function updateBadges(){
+if(calcOVR()>85 && !game.badges.includes("All-Star")){
+game.badges.push("All-Star");
+}
+if(game.stats.Three>90 && !game.badges.includes("Sniper")){
+game.badges.push("Sniper (+shooting boost)");
+}
+if(game.stats.Defense>90 && !game.badges.includes("Lockdown")){
+game.badges.push("Lockdown (+defense boost)");
+}
+}
 
-    // spend skill points to upgrade stats
-    function upgradeStat(statId) {
-        let current = player.stats[statId];
-        let cap = getStatCap(statId);
-        if (current >= cap) {
-            addLog(`⚠️ ${statId.toUpperCase()} at max for ${player.phase.toUpperCase()}`);
-            return false;
-        }
-        let cost = 1.2;
-        if (player.skillPoints < cost) {
-            addLog(`❌ Not enough SP! Need ${cost.toFixed(1)}`);
-            return false;
-        }
-        let increment = 1.0;
-        let newVal = Math.min(cap, current + increment);
-        let diff = newVal - current;
-        if (diff <= 0) return false;
-        player.skillPoints -= cost;
-        player.stats[statId] = newVal;
-        addLog(`🏀 ${STATS_LIST.find(s=>s.id===statId).name} +${diff.toFixed(0)} → ${Math.floor(newVal)}`);
-        // points added track to career points (simulate scoring improvements)
-        player.careerStats.totalPoints += Math.floor(diff * 85 + 20);
-        updateAchievements();
-        saveToLocal();
-        renderGame();
-        return true;
-    }
+// ===== GAME SIM =====
+function playGame(){
+if(game.injury>0){
+game.injury--;
+game.gameNum++;
+return;
+}
 
-    // career decision point: after high school - College OR Pro
-    function makeDecision(choice) {
-        if (player.phase !== PHASE.HS || player.decisionMade) return;
-        if (choice === "college") {
-            player.phase = PHASE.COLLEGE;
-            addLog("🎓 You committed to Duke! One year of college ball before NBA Draft.");
-            // stat adjustments: slight base increase & recalc caps
-            for (let s of STATS_LIST) {
-                let oldVal = player.stats[s.id];
-                let newCap = s.maxCapCollege;
-                player.stats[s.id] = Math.min(newCap, oldVal + 2);
-            }
-            player.decisionMade = true;
-        } else if (choice === "pro") {
-            player.phase = PHASE.NBA;
-            addLog("🚀 PRODIGY! You declared for the NBA draft directly from High School!");
-            for (let s of STATS_LIST) {
-                let oldVal = player.stats[s.id];
-                let newCap = s.maxCapNBA;
-                player.stats[s.id] = Math.min(newCap, oldVal + 4);
-            }
-            player.decisionMade = true;
-            player.careerStats.seasonsPlayed++;
-        }
-        player.lastTimestamp = Date.now();
-        saveToLocal();
-        renderGame();
-    }
+if(game.gameNum>=82){startPlayoffs(); return;}
 
-    // after college => auto NBA transition
-    function checkCollegeToNBA() {
-        if (player.phase === PHASE.COLLEGE && player.decisionMade && getOverallRating(player.stats) >= 65) {
-            // simulate end of college season
-            player.phase = PHASE.NBA;
-            player.decisionMade = true; // already true
-            addLog("🏆 NBA DRAFT! You're now an NBA rookie — chase greatness.");
-            // raise caps to nba
-            for (let s of STATS_LIST) {
-                let current = player.stats[s.id];
-                player.stats[s.id] = Math.min(s.maxCapNBA, current);
-            }
-            player.careerStats.seasonsPlayed++;
-            saveToLocal();
-            renderGame();
-        } else if (player.phase === PHASE.COLLEGE && !player.decisionMade){
-            // dummy decision flag, but after HS decision already made, we just simulate.
-            if(!player.decisionMade && player.phase === PHASE.COLLEGE){
-                // auto complete college after some progression not needed but let's just keep
-            }
-        }
-    }
+let team = game.league.find(t=>t.name===game.team);
+let opp = randomTeam();
 
-    // intensity slider handler
-    function setIntensity(value) {
-        player.intensity = parseFloat(value);
-        addLog(`⚡ Training intensity set to ${player.intensity}x (risks fatigue but bigger gains)`);
-        saveToLocal();
-        renderGame();
-    }
+let badgeBoost = game.badges.includes("Sniper")?10:0;
 
-    // Hall of fame eligibility check
-    function checkHallOfFame() {
-        let ovr = getOverallRating(player.stats);
-        let points = player.careerStats.totalPoints;
-        let hofAchieved = player.achievements.find(a=>a.id==="hof_legacy")?.unlocked;
-        if (hofAchieved) return "🏛️ ★ HALL OF FAMER ★";
-        if (player.phase === PHASE.NBA && ovr >= 88 && points >= 15000) return "🏛️ Hall of Fame Candidate";
-        if (ovr >= 82 && points >= 8000) return "⭐ Rising Legend";
-        return "⭐ Future Potential";
-    }
+let performance = calcOVR() + badgeBoost - (game.age>32?10:0);
 
-    // localStorage
-    function saveToLocal() {
-        let saveData = {
-            phase: player.phase,
-            stats: player.stats,
-            skillPoints: player.skillPoints,
-            lastTimestamp: player.lastTimestamp,
-            careerStats: player.careerStats,
-            achievements: player.achievements,
-            decisionMade: player.decisionMade,
-            intensity: player.intensity,
-            logEntries: player.logEntries.slice(0,30)
-        };
-        localStorage.setItem("bballIdleSave", JSON.stringify(saveData));
-    }
+let myScore = Math.random()*90 + performance;
+let oppScore = Math.random()*100 + opp.rosterAvg;
 
-    function loadFromLocal() {
-        let raw = localStorage.getItem("bballIdleSave");
-        if (!raw) return;
-        try {
-            let data = JSON.parse(raw);
-            player.phase = data.phase;
-            player.stats = data.stats;
-            player.skillPoints = data.skillPoints;
-            player.lastTimestamp = data.lastTimestamp;
-            player.careerStats = data.careerStats;
-            player.achievements = data.achievements;
-            player.decisionMade = data.decisionMade;
-            player.intensity = data.intensity ?? 1.0;
-            player.logEntries = data.logEntries || player.logEntries;
-            // ensure stat caps after load, avoid overflow
-            for (let s of STATS_LIST) {
-                let cap = getStatCap(s.id);
-                if (player.stats[s.id] > cap) player.stats[s.id] = cap;
-            }
-        } catch(e) {}
-    }
+if(myScore>oppScore){game.wins++; team.wins++;}
+else {game.losses++; team.losses++;}
 
-    // render full UI
-    function renderGame() {
-        const root = document.getElementById("gameRoot");
-        if (!root) return;
-        const ovr = getOverallRating(player.stats);
-        const phaseName = { highschool:"🏀 HIGH SCHOOL", college:"🎓 COLLEGE (1-and-done)", nba:"🏆 NBA STAR" }[player.phase];
-        const hofStatus = checkHallOfFame();
-        // decision buttons for HS if not made
-        let decisionWidget = "";
-        if (player.phase === PHASE.HS && !player.decisionMade && ovr >= 58) {
-            decisionWidget = `
-                <div class="decision-panel">
-                    <div style="font-weight:bold; margin-bottom:12px;">🔥 CAREER CROSSROADS 🔥</div>
-                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                        <button id="collegeBtn" style="background:#385e3d;">🎓 Play 1 Year College (higher potential)</button>
-                        <button id="proBtn" style="background:#b85c1a;">🚀 Declare for NBA Draft (immediate pro)</button>
-                    </div>
-                    <div style="font-size:0.7rem; margin-top:10px;">⭐ NBA 2K26 decision: college develops skills, direct-to-NBA steeper climb but faster fame</div>
-                </div>
-            `;
-        } else if (player.phase === PHASE.COLLEGE && getOverallRating(player.stats) >= 68) {
-            decisionWidget = `<div class="decision-panel" style="background:#ffb34730;"><span>🏀 NCAA season finished! You will enter NBA Draft automatically soon (keep training).</span><button id="forceNBA" style="margin-left:15px;">Enter NBA Now</button></div>`;
-        }
+game.career.pts+=Math.floor(myScore/2);
+game.career.games++;
 
-        // stats html
-        let statsHtml = `<div class="stats-panel"><div style="font-size:1.4rem;">🏅 ${phaseName} | OVERALL: ${ovr}  | ${hofStatus}</div>
-        <div class="stat-grid">`;
-        STATS_LIST.forEach(s => {
-            let val = Math.floor(player.stats[s.id]);
-            let cap = getStatCap(s.id);
-            statsHtml += `<div class="stat-card">
-                <div class="stat-name">${s.name}</div>
-                <div class="stat-value">${val}</div>
-                <div class="stat-progress">MAX: ${cap}</div>
-                <button class="upgrade-btn" data-stat="${s.id}" style="margin-top:8px; background:#f0a500; font-size:0.7rem;">⬆️ TRAIN (1.2 SP)</button>
-            </div>`;
-        });
-        statsHtml += `</div></div>`;
+if(Math.random()<0.05){
+game.injury = Math.floor(Math.random()*5)+1;
+}
 
-        // training & intensity
-        let trainingHtml = `
-        <div class="training-area">
-            <div class="active-training">
-                <button class="train-btn" id="activeTrainBtn">🏀 ACTIVE WORKOUT + GAIN SP 🏀</button>
-                <div class="intensity-slider">
-                    <label>⚙️ Intensity (risk/reward): ${player.intensity.toFixed(1)}x </label>
-                    <input type="range" id="intensitySlider" min="0.5" max="2.0" step="0.05" value="${player.intensity}">
-                    <div style="font-size:0.7rem;">Higher intensity = faster gains, but minor simulated fatigue flavor</div>
-                </div>
-            </div>
-            <div style="background:#00000099; border-radius:28px; padding:10px; min-width:150px;">
-                <div>💎 SKILL POINTS: <span style="font-size:1.8rem;font-weight:bold;">${player.skillPoints.toFixed(1)}</span></div>
-                <div>🏆 Career Points: ${Math.floor(player.careerStats.totalPoints).toLocaleString()}</div>
-                <div>🎯 Triple-Doubles: ${player.careerStats.tripleDoubles}</div>
-                <div>📀 Seasons Pro: ${player.careerStats.seasonsPlayed}</div>
-            </div>
-        </div>`;
+game.tp+=1;
+game.gameNum++;
 
-        // achievements unlocked area
-        let achHtml = `<div style="margin:12px 0;"><div>🏅 LEGACY ACHIEVEMENTS</div><div class="achievements-grid">`;
-        player.achievements.forEach(ach => {
-            achHtml += `<div class="achievement ${ach.unlocked ? 'unlocked' : ''}">${ach.unlocked ? '✔️' : '🔒'} ${ach.name}</div>`;
-        });
-        achHtml += `</div></div>`;
+simulateLeague();
+updateBadges();
 
-        // decision widget + manual transition
-        let manualTransition = "";
-        if (decisionWidget) manualTransition = decisionWidget;
+render();
+}
 
-        let logHtml = `<div class="log"><div style="font-weight:bold;">📜 GAME LOG</div>${player.logEntries.map(l=>`<div>• ${l}</div>`).join('')}</div>`;
-        let resetBtn = `<button id="resetGame" style="background:#802020; margin-top:12px;">🔄 HARD RESET (erase career)</button>`;
+// ===== LEAGUE SIM =====
+function simulateLeague(){
+game.league.forEach(t=>{
+if(t.name!==game.team){
+Math.random()>0.5?t.wins++:t.losses++;
+}
+});
+}
 
-        const finalHtml = `
-            <div class="career-header">
-                <span class="career-stage">🏀 BASKETBALL IDLE: 2K26 CAREER MODE</span>
-                <span class="record-badge">🏅 ${phaseName} | OVR ${ovr}</span>
-            </div>
-            <div class="resource-bar">
-                <span>⏳ Idle progress accumulates SP when closed</span>
-                <span>✨ Real NBA progression caps</span>
-            </div>
-            ${statsHtml}
-            ${trainingHtml}
-            ${achHtml}
-            ${manualTransition}
-            ${logHtml}
-            ${resetBtn}
-        `;
-        root.innerHTML = finalHtml;
+// ===== SEASON =====
+function simSeason(){
+while(game.gameNum<82) playGame();
+}
 
-        // attach events after render
-        document.querySelectorAll(".upgrade-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                let statId = btn.getAttribute("data-stat");
-                upgradeStat(statId);
-            });
-        });
-        let trainBtn = document.getElementById("activeTrainBtn");
-        if (trainBtn) trainBtn.addEventListener("click", () => activeTrain());
-        let intensitySlider = document.getElementById("intensitySlider");
-        if (intensitySlider) intensitySlider.addEventListener("input", (e) => setIntensity(e.target.value));
-        let collegeBtn = document.getElementById("collegeBtn");
-        if (collegeBtn) collegeBtn.addEventListener("click", () => makeDecision("college"));
-        let proBtn = document.getElementById("proBtn");
-        if (proBtn) proBtn.addEventListener("click", () => makeDecision("pro"));
-        let forceNBABtn = document.getElementById("forceNBA");
-        if (forceNBABtn) forceNBABtn.addEventListener("click", () => {
-            if (player.phase === PHASE.COLLEGE) {
-                player.phase = PHASE.NBA;
-                addLog("🏀 You declared for the NBA Draft early! Welcome to The League.");
-                player.careerStats.seasonsPlayed++;
-                for(let s of STATS_LIST){
-                    let curr = player.stats[s.id];
-                    player.stats[s.id] = Math.min(s.maxCapNBA, curr+1);
-                }
-                saveToLocal();
-                renderGame();
-            }
-        });
-        let resetBtnElem = document.getElementById("resetGame");
-        if (resetBtnElem) resetBtnElem.addEventListener("click", () => {
-            localStorage.removeItem("bballIdleSave");
-            location.reload();
-        });
-    }
+// ===== PLAYOFFS =====
+function startPlayoffs(){
+let ranked=[...game.league].sort((a,b)=>b.wins-a.wins).slice(0,16);
 
-    // infinite game loop refreshes UI every 0.5s to show idle accumulation and time-based gains.
-    function gameLoop() {
-        updateIdleProgress();
-        // college to nba condition
-        if (player.phase === PHASE.COLLEGE && getOverallRating(player.stats) >= 72 && !player.decisionMade === false) {
-            // ensure auto progression
-            if (player.phase === PHASE.COLLEGE && player.decisionMade && getOverallRating(player.stats) >= 68){
-                checkCollegeToNBA();
-            } else if(player.phase === PHASE.COLLEGE && !player.decisionMade){
-                // safety
-            } else checkCollegeToNBA();
-        }
-        updateAchievements();
-        renderGame();
-        requestAnimationFrame(() => setTimeout(gameLoop, 800));
-    }
+let myTeam=ranked.find(t=>t.name===game.team);
+let log="";
 
-    // init load
-    loadFromLocal();
-    if (!player.lastTimestamp) player.lastTimestamp = Date.now();
-    // ensure stats integrity
-    for(let s of STATS_LIST){
-        if(!player.stats[s.id]) player.stats[s.id] = s.base;
-        let capNow = getStatCap(s.id);
-        if(player.stats[s.id] > capNow) player.stats[s.id] = capNow;
-    }
-    updateIdleProgress(); // catch idle on load
-    gameLoop();
+if(!myTeam){
+log="Missed playoffs";
+document.getElementById("playoffLog").innerHTML=log;
+endSeason();
+return;
+}
+
+for(let r=1;r<=4;r++){
+let wins=0,losses=0;
+
+while(wins<4 && losses<4){
+let adv = calcOVR()/120;
+if(Math.random()<adv) wins++; else losses++;
+}
+
+log+=`Round ${r}: ${wins}-${losses}<br>`;
+
+if(losses===4){
+document.getElementById("playoffLog").innerHTML=log;
+endSeason();
+return;
+}
+}
+
+game.rings++;
+game.awards.push("Champion S"+game.season);
+
+document.getElementById("playoffLog").innerHTML=log+"🏆 Champion";
+
+endSeason();
+}
+
+// ===== FREE AGENCY =====
+function generateOffers(){
+let offers = game.league.map(t=>{
+let value = calcOVR() + Math.random()*20;
+return {
+team:t.name,
+salary:Math.floor(value*100000),
+years:Math.floor(Math.random()*4)+1
+};
+});
+
+let top = offers.sort((a,b)=>b.salary-a.salary).slice(0,5);
+
+document.getElementById("offers").innerHTML = top.map(o=>
+`<div>${o.team} - $${o.salary} (${o.years}y)
+<button onclick="acceptOffer('${o.team}',${o.years},${o.salary})">Sign</button></div>`
+).join("");
+}
+
+function acceptOffer(team,years,salary){
+game.team=team;
+game.contract={years,salary};
+}
+
+// ===== TRADES =====
+function tradeAI(){
+if(Math.random()<0.2){
+let newTeam = randomTeam();
+game.team=newTeam.name;
+alert("Trade! You were moved to "+newTeam.name);
+}
+}
+
+// ===== END SEASON =====
+function endSeason(){
+awardCheck();
+tradeAI();
+
+game.age++;
+game.season++;
+game.gameNum=0;
+game.wins=0;
+game.losses=0;
+game.contract.years--;
+
+if(game.contract.years<=0){
+generateOffers();
+show('fa');
+}
+
+createLeague();
+}
+
+// ===== AWARDS =====
+function awardCheck(){
+let ppg = game.career.pts/(game.career.games||1);
+if(ppg>28) game.awards.push("MVP S"+game.season);
+}
+
+// ===== UI =====
+function render(){
+document.getElementById("teamInfo").innerText="Team: "+(game.team||"None");
+document.getElementById("contractInfo").innerText=
+`Contract: ${game.contract.years} yrs | $${game.contract.salary}`;
+document.getElementById("ageInfo").innerText="Age: "+game.age;
+
+document.getElementById("tp").innerText=game.tp;
+
+document.getElementById("statsList").innerHTML=
+Object.keys(game.stats).map(s=>
+`${s}: ${game.stats[s]} <button onclick="upgrade('${s}')">+</button>`
+).join("<br>");
+
+document.getElementById("seasonInfo").innerText=
+`Season ${game.season} | ${game.wins}-${game.losses} | Game ${game.gameNum}/82 | Injury: ${game.injury}`;
+
+document.getElementById("standings").innerHTML=
+[...game.league].sort((a,b)=>b.wins-a.wins)
+.slice(0,10)
+.map(t=>`${t.name} ${t.wins}-${t.losses}`)
+.join("<br>");
+
+let g=game.career.games||1;
+
+document.getElementById("ovr").innerText=calcOVR();
+document.getElementById("ppg").innerText=(game.career.pts/g).toFixed(1);
+document.getElementById("eff").innerText=(calcOVR()/g*10).toFixed(2);
+document.getElementById("rings").innerText=game.rings;
+document.getElementById("age").innerText=game.age;
+
+document.getElementById("badges").innerHTML=
+game.badges.map(b=>`<div class="badge">${b}</div>`).join("");
+
+document.getElementById("awards").innerText=game.awards.join(", ");
+
+save();
+}
+
+render();
+
 </script>
 </body>
 </html>
