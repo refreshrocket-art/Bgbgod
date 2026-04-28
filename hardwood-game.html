@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>HARDWOOD</title>
+<style>
+:root{--bg:#0e0b06;--bg2:#161009;--gold:#e8b84b;--gold2:#f5d070;--gold3:rgba(232,184,75,.14);--chalk:#f0ead8;--chalk2:#b8b098;--chalk3:#6a6050;--green:#2da860;--green2:#40d878;--orange:#e05518;--orange2:#f06828;--red:#c42840;--blue2:#5090ff;--border:rgba(232,184,75,.2);--card:rgba(255,255,255,.03);--f1:"Courier New",monospace;--f2:Georgia,serif;--f3:system-ui,sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:13px}
+body{background:var(--bg);color:var(--chalk);font-family:var(--f3);min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;background:repeating-linear-gradient(89deg,transparent,transparent 60px,rgba(255,190,60,.012) 60px,rgba(255,190,60,.012) 61px);pointer-events:none;z-index:0}
+.screen{display:none}.screen.active{display:flex;flex-direction:column}
+#app{position:relative;z-index:1;max-width:780px;margin:0 auto;min-height:100vh}
+#welcome-screen{align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+.logo{font-family:var(--f2);font-size:clamp(52px,14vw,100px);font-weight:bold;color:var(--gold);letter-spacing:.08em;line-height:1;text-shadow:0 0 40px rgba(232,184,75,.25)}
+.logo-sub{font-family:var(--f1);font-size:10px;letter-spacing:.4em;color:var(--chalk3);margin-bottom:32px}
+.wform{width:100%;max-width:320px}
+.ig{margin-bottom:12px;text-align:left}
+.ig label{display:block;font-family:var(--f1);font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--chalk3);margin-bottom:5px}
+.ig input,.ig select{width:100%;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:3px;color:var(--chalk);font-family:var(--f1);font-size:12px;outline:none;-webkit-appearance:none}
+.ig input:focus,.ig select:focus{border-color:var(--gold)}
+.ig select option{background:var(--bg2)}
+#hdr{background:rgba(8,6,2,.97);border-bottom:1px solid var(--border);padding:7px 12px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;backdrop-filter:blur(8px);flex-shrink:0}
+.hbrand{font-family:var(--f2);font-size:16px;font-weight:bold;color:var(--gold);letter-spacing:.1em;white-space:nowrap}
+.hmid{flex:1;text-align:center}
+.hphase{font-family:var(--f1);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--chalk3)}
+.hplayer{font-family:var(--f1);font-size:10px;color:var(--gold2)}
+.htp{font-family:var(--f1);font-size:11px;color:var(--chalk2);white-space:nowrap}
+.htp strong{font-size:15px;color:var(--gold)}
+#pbw{background:rgba(0,0,0,.5);border-bottom:1px solid var(--border);padding:5px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pbl{font-family:var(--f1);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--chalk3);white-space:nowrap;width:88px}
+.pbt{flex:1;height:7px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.pbf{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s ease}
+.pbp{font-family:var(--f1);font-size:10px;color:var(--gold2);width:32px;text-align:right}
+#tabs{display:flex;background:rgba(0,0,0,.55);border-bottom:1px solid var(--border);flex-shrink:0}
+.tb{flex:1;padding:8px 4px;background:none;border:none;border-bottom:2px solid transparent;color:var(--chalk3);font-family:var(--f1);font-size:9px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:center}
+.tb:hover{color:var(--chalk2)}.tb.on{color:var(--gold);border-bottom-color:var(--gold)}
+.ti{display:block;font-size:14px;margin-bottom:1px}
+.panel{display:none;padding:10px;flex:1;overflow-y:auto}.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:10px;margin-bottom:8px}
+.ct{font-family:var(--f1);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 16px;border:1px solid var(--border);border-radius:3px;background:var(--card);color:var(--chalk);font-family:var(--f1);font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .12s;user-select:none;-webkit-tap-highlight-color:transparent}
+.btn:hover{background:var(--gold3);border-color:var(--gold);color:var(--gold)}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.35;cursor:default;transform:none}
+.btn.gold{background:var(--gold);border-color:var(--gold2);color:var(--bg);font-weight:bold}.btn.gold:hover{background:var(--gold2)}
+.btn.grn{background:var(--green);border-color:var(--green2);color:#fff;font-weight:bold}.btn.grn:hover{background:var(--green2)}
+.btn.org{background:var(--orange);border-color:var(--orange2);color:#fff;font-weight:bold}
+.btn.gm-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 8px;border:1px solid rgba(192,132,252,.35);background:rgba(192,132,252,.07);color:#e9d5ff;font-family:var(--f1);font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:3px;transition:all .15s;gap:2px;text-align:center;line-height:1.2}
+.btn.gm-btn:hover{background:rgba(192,132,252,.2);border-color:#c084fc;color:#fff}
+.btn.gm-btn:active{transform:scale(.97)}
+.gm-sub{display:block;font-size:8px;letter-spacing:.05em;color:rgba(192,132,252,.6);margin-top:2px;text-transform:none}
+#god-panel{border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.04)}
+.btn.sm{padding:5px 10px;font-size:9px}.btn.lg{padding:12px 24px;font-size:12px}.btn.full{width:100%}
+.sr{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.sl{font-family:var(--f1);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--chalk3);width:96px;flex-shrink:0}
+.sbw{flex:1;height:6px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.sbf{height:100%;border-radius:2px;transition:width .35s ease}
+.sbf.t1{background:linear-gradient(90deg,#4040a0,#6060c0)}.sbf.t2{background:linear-gradient(90deg,var(--green),#50e090)}.sbf.t3{background:linear-gradient(90deg,var(--gold),var(--gold2))}.sbf.t4{background:linear-gradient(90deg,var(--orange),#ff8040)}.sbf.t5{background:linear-gradient(90deg,var(--red),#ff5070)}
+.sv{font-family:var(--f1);font-size:11px;font-weight:bold;color:var(--chalk);width:22px;text-align:right;flex-shrink:0}
+.sc{font-family:var(--f1);font-size:9px;color:var(--chalk3);width:18px;flex-shrink:0}
+.db{position:relative;width:100%;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:3px;color:var(--chalk);cursor:pointer;text-align:left;transition:all .12s;overflow:hidden;margin-bottom:5px;-webkit-tap-highlight-color:transparent;user-select:none}
+.db:hover{border-color:var(--gold);background:var(--gold3)}.db:active{transform:scale(.99)}.db.cool{opacity:.55;cursor:default}
+.dcd{position:absolute;top:0;left:0;height:2px;background:var(--gold);transition:width .1s linear}
+.dn{font-family:var(--f1);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+.dd{font-size:11px;color:var(--chalk3);margin-bottom:3px}.dr{font-family:var(--f1);font-size:11px;color:var(--green2);font-weight:bold}
+.int-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px}
+.ib{padding:7px 4px;border:1px solid var(--border);border-radius:3px;background:var(--card);color:var(--chalk3);font-family:var(--f1);font-size:9px;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:center}
+.ib .im{font-size:14px;font-weight:bold;display:block;margin-bottom:1px}
+.ib:hover{border-color:var(--gold);color:var(--chalk)}
+.ib.ir{border-color:#5ac0c8;color:#5ac0c8;background:rgba(90,192,200,.1)}
+.ib.im2{border-color:var(--green);color:var(--green2);background:rgba(45,168,96,.1)}
+.ib.ii{border-color:var(--gold);color:var(--gold2);background:var(--gold3)}
+.ib.ix{border-color:var(--orange);color:var(--orange2);background:rgba(224,85,24,.1)}
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.ms2{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:3px;padding:8px;text-align:center}
+.msv{font-family:var(--f2);font-size:20px;font-weight:bold;color:var(--gold);line-height:1}
+.msl{font-family:var(--f1);font-size:8px;letter-spacing:.15em;text-transform:uppercase;color:var(--chalk3);margin-top:3px}
+#decision-screen{align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.dcards{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:560px;margin:16px 0}
+@media(max-width:440px){.dcards{grid-template-columns:1fr}}
+.dc{background:var(--card);border:2px solid var(--border);border-radius:5px;padding:20px 16px;cursor:pointer;transition:all .18s;text-align:center}
+.dc:hover{border-color:var(--gold);transform:translateY(-2px)}.dc:active{transform:scale(.98)}
+.dci{font-size:36px;margin-bottom:8px}.dct{font-family:var(--f2);font-size:18px;color:var(--gold);margin-bottom:6px}
+.dcp{list-style:none;text-align:left;margin-top:8px}.dcp li{font-size:11px;color:var(--chalk2);padding:2px 0 2px 12px;position:relative}.dcp li::before{content:">";position:absolute;left:0;color:var(--gold)}
+#nc{position:fixed;top:12px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:240px}
+.notif{background:rgba(10,7,2,.97);border:1px solid var(--gold);border-radius:3px;padding:8px 12px;font-size:11px;color:var(--chalk);pointer-events:auto;animation:ni .25s ease,no .25s ease 2.75s forwards;box-shadow:0 4px 16px rgba(0,0,0,.7)}
+.notif .nt{font-family:var(--f1);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+.notif.na{border-color:var(--orange2)}.notif.na .nt{color:var(--orange2)}
+.notif.nl{border-color:var(--green2)}.notif.nl .nt{color:var(--green2)}
+@keyframes ni{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes no{to{opacity:0;transform:translateX(16px)}}
+.fp{position:fixed;pointer-events:none;font-family:var(--f2);font-weight:bold;font-size:16px;color:var(--green2);text-shadow:0 0 8px rgba(64,216,120,.4);z-index:9998;animation:fu .8s ease forwards}
+@keyframes fu{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-44px) scale(.85)}}
+.howto{background:rgba(15,31,61,.4);border:1px solid rgba(40,88,204,.3);border-radius:3px;padding:10px 12px;margin-bottom:8px;font-size:11px;color:var(--chalk2);line-height:1.65}
+.howto strong{color:var(--gold2)}.ht{font-family:var(--f1);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--blue2);margin-bottom:6px}
+.hofbar{position:relative;height:18px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;margin:6px 0}
+.hofb{height:100%;background:linear-gradient(90deg,#2858cc,var(--gold));transition:width .5s ease}
+.hofl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--f1);font-size:9px;letter-spacing:.15em;color:var(--chalk)}
+.sc2{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:8px 10px;margin-bottom:5px}
+.sh2{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.sy{font-family:var(--f1);font-size:9px;letter-spacing:.15em;color:var(--gold);text-transform:uppercase}
+.saw{font-size:9px;font-family:var(--f1);padding:2px 7px;border-radius:2px;background:rgba(232,184,75,.12);border:1px solid rgba(232,184,75,.3);color:var(--gold2)}
+.ss{display:flex;gap:8px;flex-wrap:wrap}
+.sv2{font-family:var(--f1);font-size:10px;color:var(--chalk2)}.sv2 strong{color:var(--chalk)}
+.ai{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--card);border:1px solid var(--border);border-radius:3px;margin-bottom:4px}
+.ai.on{border-color:rgba(232,184,75,.35)}.ai.off{opacity:.4}
+.aico{font-size:20px;flex-shrink:0}.ainfo{flex:1;min-width:0}
+.an{font-family:var(--f1);font-size:10px;font-weight:bold;color:var(--chalk);margin-bottom:1px}
+.ad{font-size:10px;color:var(--chalk3)}
+.abg{font-family:var(--f1);font-size:8px;padding:2px 6px;border-radius:2px;background:rgba(232,184,75,.12);border:1px solid rgba(232,184,75,.25);color:var(--gold);white-space:nowrap}
+.bi{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:3px;margin-bottom:5px}
+.bico{font-size:20px}.binfo{flex:1}.bn{font-family:var(--f1);font-size:10px;font-weight:bold;color:var(--chalk);margin-bottom:1px}.bd{font-size:10px;color:var(--chalk3)}
+.bprice{font-family:var(--f1);font-size:11px;font-weight:bold;color:var(--gold);margin-bottom:3px;text-align:right}
+.logw{max-height:140px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.le{font-family:var(--f1);font-size:10px;color:var(--chalk3);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.le .lt{color:var(--chalk3);margin-right:6px}.le .lm{color:var(--chalk2)}.le.li .lm{color:var(--gold2)}.le.la .lm{color:var(--orange2)}
+.cg{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+@media(max-width:440px){.cg{grid-template-columns:repeat(2,1fr)}}
+.cs3{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:8px 6px;text-align:center}
+.csv{font-family:var(--f2);font-size:16px;font-weight:bold;color:var(--chalk);line-height:1}.csv.hi{color:var(--gold)}
+.csl{font-family:var(--f1);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--chalk3);margin-top:3px}
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px}
+.mbox{background:var(--bg2);border:1px solid var(--gold);border-radius:5px;padding:24px;max-width:400px;width:100%;text-align:center}
+.mtitle{font-family:var(--f2);font-size:22px;color:var(--gold);margin-bottom:10px}
+.mbody{font-size:12px;color:var(--chalk2);line-height:1.65;margin-bottom:16px}
+.mbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ribbon{display:inline-block;font-family:var(--f1);font-size:8px;letter-spacing:.15em;text-transform:uppercase;padding:2px 7px;border-radius:2px}
+#ff-btn{padding:5px 10px;border:1px solid var(--gold);border-radius:3px;background:var(--gold3);color:var(--gold2);font-family:var(--f1);font-size:10px;font-weight:bold;letter-spacing:.1em;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+#ff-btn:hover{background:var(--gold);color:var(--bg)}
+#ff-btn.active{background:var(--orange);border-color:var(--orange2);color:#fff;animation:ffpulse 0.6s ease-in-out infinite}
+@keyframes ffpulse{0%,100%{opacity:1}50%{opacity:.7}}
+.rg{background:rgba(45,168,96,.18);border:1px solid var(--green);color:var(--green2)}
+.ro{background:rgba(232,184,75,.15);border:1px solid var(--gold);color:var(--gold2)}
+.rr{background:rgba(196,40,64,.18);border:1px solid var(--red);color:#ff6070}
+::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+hr{border:none;border-top:1px solid var(--border);margin:8px 0}
+.fb{display:flex;align-items:center;justify-content:space-between}
+.fc{display:flex;align-items:center;gap:8px}
+.mt8{margin-top:8px}.mb8{margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="nc"></div>
+
+<div id="welcome-screen" class="screen active">
+  <div class="logo">HW</div>
+  <div class="logo-sub">Basketball Career Simulator</div>
+  <div class="wform">
+    <div class="ig"><label>Name</label><input id="inp-name" type="text" placeholder="Your name" maxlength="18"></div>
+    <div class="ig"><label>Position</label>
+      <select id="inp-pos">
+        <option value="PG">Point Guard (PG)</option><option value="SG">Shooting Guard (SG)</option>
+        <option value="SF">Small Forward (SF)</option><option value="PF">Power Forward (PF)</option>
+        <option value="C">Center (C)</option>
+      </select></div>
+    <div class="ig"><label>Archetype</label>
+      <select id="inp-arch">
+        <option value="scorer">Scorer</option><option value="playmaker">Playmaker</option>
+        <option value="twoway">Two-Way</option><option value="bigman">Big Man</option>
+      </select></div>
+    <button class="btn gold lg full mt8" onclick="startGame()">BEGIN CAREER</button>
+    <div id="load-wrap" style="display:none;margin-top:8px">
+      <button class="btn full" onclick="doLoad()">CONTINUE SAVED CAREER</button>
+    </div>
+  </div>
+</div>
+
+<div id="decision-screen" class="screen">
+  <div style="max-width:560px;margin:0 auto;padding:20px;width:100%">
+    <div class="howto" style="text-align:center">
+      <div class="ht">DRAFT SEASON - THE DECISION</div>
+      <div id="dec-narr"></div>
+    </div>
+    <div class="dcards">
+      <div class="dc" onclick="decide('nba')">
+        <div class="dci">&#127936;</div><div class="dct">Enter NBA Draft</div>
+        <div style="font-size:10px;color:var(--chalk3)">Go pro now</div>
+        <ul class="dcp" id="dnba-pros"></ul>
+      </div>
+      <div class="dc" onclick="decide('college')">
+        <div class="dci">&#127979;</div><div class="dct">Go to College</div>
+        <div style="font-size:10px;color:var(--chalk3)">1 year - bigger upside</div>
+        <ul class="dcp" id="dcol-pros"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="game-ui" class="screen">
+  <div id="hdr">
+    <div class="hbrand">HW</div>
+    <div class="hmid"><div class="hphase" id="hdr-phase">HIGH SCHOOL</div><div class="hplayer" id="hdr-name"></div></div>
+    <div class="htp">TP <strong id="hdr-tp">0</strong></div>
+    <div style="font-family:var(--f2);font-size:11px;color:var(--chalk2);white-space:nowrap">OVR <strong id="hdr-ovr" style="font-size:17px;color:var(--gold)">--</strong></div>
+    <button id="ff-btn" onclick="toggleFastForward()" title="Fast Forward — auto-plays at 30x speed">&#9193; FF</button>
+  </div>
+  <div id="pbw">
+    <div class="pbl" id="pb-lbl">HS Progress</div>
+    <div class="pbt"><div class="pbf" id="pb-fill" style="width:0%"></div></div>
+    <div class="pbp" id="pb-pct">0%</div>
+    <button class="btn sm" id="pb-btn" onclick="advancePhase()" style="display:none;margin-left:6px">NEXT ></button>
+  </div>
+  <div id="tabs">
+    <button class="tb on" id="tb-train" onclick="showTab('train')"><span class="ti">&#127947;</span>TRAIN</button>
+    <button class="tb" id="tb-stats" onclick="showTab('stats')"><span class="ti">&#128202;</span>STATS</button>
+    <button class="tb" id="tb-career" onclick="showTab('career')"><span class="ti">&#127942;</span>CAREER</button>
+    <button class="tb" id="tb-goals" onclick="showTab('goals')"><span class="ti">&#11088;</span>GOALS</button>
+    <button class="tb" id="tb-more" onclick="showTab('more')"><span class="ti">&#9881;</span>MORE</button>
+  </div>
+
+  <div id="panel-train" class="panel on">
+    <div class="howto">
+      <div class="ht">HOW TO PROGRESS</div>
+      <strong>1. Tap drills</strong> below to earn Training Points (TP) + stat XP instantly.<br>
+      <strong>2. TP auto-spends</strong> on your focused stats every second - watch the bars grow!<br>
+      <strong>3. Phase bar</strong> at the top fills over time and with every drill tap.<br>
+      <strong>4. Hit 100%</strong> on the phase bar to trigger Draft Day and advance your career.<br>
+      <strong>5. NBA phase:</strong> Go to Career tab and tap Simulate Season for stats and awards.
+    </div>
+    <div class="card" style="padding:8px 10px">
+      <div class="fb mb8">
+        <div><div style="font-family:var(--f1);font-size:9px;letter-spacing:.2em;color:var(--chalk3)">STAMINA</div><div id="stam-txt" style="font-family:var(--f1);font-size:11px;color:var(--chalk2)">100%</div></div>
+        <div style="flex:1;margin:0 10px"><div id="stam-bar" style="height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden"><div id="stam-fill" style="height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--green2));transition:width .4s;width:100%"></div></div></div>
+        <div style="text-align:right"><div style="font-family:var(--f1);font-size:9px;color:var(--chalk3)">IDLE RATE</div><div style="font-family:var(--f1);font-size:11px;color:var(--green2)"><span id="tp-rate">0</span> TP/hr</div></div>
+      </div>
+      <div class="int-row" id="int-row">
+        <button class="ib" id="ib-rest" onclick="setInt('rest')"><span class="im">0.5x</span>Rest</button>
+        <button class="ib" id="ib-moderate" onclick="setInt('moderate')"><span class="im">1x</span>Normal</button>
+        <button class="ib" id="ib-intense" onclick="setInt('intense')"><span class="im">1.75x</span>Intense</button>
+        <button class="ib" id="ib-max" onclick="setInt('max')"><span class="im">2.5x</span>Max</button>
+      </div>
+      <div id="int-warn" style="font-size:10px;color:var(--orange2);display:none"></div>
+    </div>
+    <div class="card" style="padding:8px 10px">
+      <div class="ct">Training Focus (boosts auto-spend on these stats)</div>
+      <div class="g2" id="focus-btns"></div>
+    </div>
+    <div class="card" style="padding:8px 10px">
+      <div class="ct">Active Drills - Tap to earn TP and stat XP instantly</div>
+      <div id="drills"></div>
+    </div>
+  </div>
+
+  <div id="panel-stats" class="panel">
+    <div class="card">
+      <div class="fb mb8">
+        <div><div style="font-family:var(--f2);font-size:48px;font-weight:bold;color:var(--gold);line-height:1" id="st-ovr">--</div><div style="font-family:var(--f1);font-size:8px;letter-spacing:.25em;color:var(--chalk3)">OVERALL</div></div>
+        <div style="text-align:right"><div style="font-family:var(--f2);font-size:16px;color:var(--chalk)" id="st-name">--</div><div style="font-family:var(--f1);font-size:10px;color:var(--chalk3);margin-top:2px" id="st-pa">--</div><div style="margin-top:6px" id="st-badges"></div></div>
+      </div>
+    </div>
+    <div class="card"><div class="ct">Inside Scoring</div><div id="sb-inside"></div></div>
+    <div class="card"><div class="ct">Ranged Shooting</div><div id="sb-range"></div></div>
+    <div class="card"><div class="ct">Handling</div><div id="sb-handle"></div></div>
+    <div class="card"><div class="ct">Defense</div><div id="sb-defense"></div></div>
+    <div class="card"><div class="ct">Rebounding</div><div id="sb-rebound"></div></div>
+    <div class="card"><div class="ct">Athleticism</div><div id="sb-athlete"></div></div>
+  </div>
+
+  <div id="panel-career" class="panel">
+    <div id="career-phase-box" class="howto" style="display:none"></div>
+    <div class="card"><div class="ct">Career Stats</div><div class="cg" id="career-grid"></div></div>
+    <div class="card" id="nba-card" style="display:none">
+      <div class="ct">NBA Season</div>
+      <div class="mg" id="nba-mini"></div>
+      <div style="font-size:10px;color:var(--chalk3);margin-bottom:8px">Simulate a full 82-game season. Earns career stats, awards, and TP.</div>
+      <button class="btn gold full" id="sim-btn" onclick="simulateSeason()">SIMULATE SEASON</button>
+    </div>
+    <div class="card">
+      <div class="ct">Hall of Fame Tracker</div>
+      <div class="hofbar"><div class="hofb" id="hof-bar" style="width:0%"></div><div class="hofl" id="hof-lbl">HOF: 0 / 100</div></div>
+      <div style="font-size:9px;color:var(--chalk3);margin-top:4px" id="hof-break"></div>
+    </div>
+    <div class="card"><div class="ct">Season History</div><div id="season-hist"></div></div>
+  </div>
+
+  <div id="panel-goals" class="panel">
+    <div class="mg" id="goal-sum"></div>
+    <div id="goal-list" class="mt8"></div>
+  </div>
+
+  <div id="panel-more" class="panel">
+    <div class="card" id="god-panel">
+      <div class="ct" style="color:#c084fc;border-color:rgba(192,132,252,.3)">&#9889; GOD MODE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <button class="btn gm-btn" onclick="gmMaxStats()">&#128293; Max All Stats<span class="gm-sub">Set every stat to 99</span></button>
+        <button class="btn gm-btn" onclick="gmInfiniteTP()">&#128176; +999,999 TP<span class="gm-sub">Infinite training points</span></button>
+        <button class="btn gm-btn" onclick="gmSkipToNBA()">&#127946; Skip to NBA<span class="gm-sub">Bypass HS &amp; college</span></button>
+        <button class="btn gm-btn" onclick="gmMaxStamina()">&#9889; Full Stamina<span class="gm-sub">Restore to 100%</span></button>
+        <button class="btn gm-btn" onclick="gmWinChampionship()">&#128081; Win Championship<span class="gm-sub">Add a ring + awards</span></button>
+        <button class="btn gm-btn" onclick="gmBlastCareer()">&#128640; Blast Career Stats<span class="gm-sub">+10 seasons of peak stats</span></button>
+        <button class="btn gm-btn" onclick="gmUnlockAll()">&#11088; Unlock All Goals<span class="gm-sub">Complete every achievement</span></button>
+        <button class="btn gm-btn" onclick="gmMaxBoosts()">&#128200; Max All Boosts<span class="gm-sub">Buy every boost upgrade</span></button>
+      </div>
+      <div id="gm-log" style="font-family:var(--f1);font-size:10px;color:#c084fc;margin-top:8px;min-height:16px;text-align:center"></div>
+    </div>
+    <div class="card"><div class="ct">Training Boosts (spend TP)</div><div id="boost-list"></div></div>
+    <div class="card"><div class="ct">Activity Log</div><div class="logw" id="act-log"></div></div>
+    <div class="card">
+      <div class="ct">Options</div>
+      <div class="fc" style="flex-wrap:wrap;gap:6px">
+        <button class="btn grn" onclick="saveGame()">Save</button>
+        <button class="btn" onclick="exportSave()">Export</button>
+        <button class="btn" style="color:var(--red);border-color:var(--red)" onclick="confirmReset()">New Career</button>
+      </div>
+      <div style="font-size:10px;color:var(--chalk3);margin-top:6px" id="save-info"></div>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="modal" style="display:none" onclick="closeModal()">
+  <div class="mbox" onclick="event.stopPropagation()">
+    <div class="mtitle" id="m-title"></div>
+    <div class="mbody" id="m-body"></div>
+    <div class="mbtns" id="m-btns"></div>
+  </div>
+</div>
+
+<script>
+const SK='hw4';
+const PH={HS:'hs',COL:'college',NBA:'nba'};
+
+const STATS=[
+  {id:'closeShot',n:'Close Shot',  cat:'inside', b:38,hc:72,cc:80,nc:99},
+  {id:'drivLayup',n:'Driv. Layup', cat:'inside', b:42,hc:70,cc:78,nc:99},
+  {id:'drivDunk', n:'Driv. Dunk',  cat:'inside', b:35,hc:65,cc:75,nc:99},
+  {id:'midRange', n:'Mid-Range',   cat:'range',  b:30,hc:68,cc:76,nc:99},
+  {id:'threePoint',n:'3-Point',    cat:'range',  b:25,hc:60,cc:72,nc:99},
+  {id:'freeThrow',n:'Free Throw',  cat:'range',  b:40,hc:65,cc:75,nc:99},
+  {id:'ballHandle',n:'Ball Handle',cat:'handle', b:35,hc:65,cc:76,nc:99},
+  {id:'passAcc',  n:'Pass Acc.',   cat:'handle', b:32,hc:62,cc:74,nc:99},
+  {id:'speedBall',n:'Speed/Ball',  cat:'handle', b:38,hc:64,cc:74,nc:99},
+  {id:'perimDef', n:'Perim. Def.', cat:'defense',b:28,hc:60,cc:72,nc:99},
+  {id:'interDef', n:'Inter. Def.', cat:'defense',b:25,hc:58,cc:70,nc:99},
+  {id:'steal',    n:'Steal',       cat:'defense',b:25,hc:55,cc:68,nc:99},
+  {id:'offReb',   n:'Off. Reb.',   cat:'rebound',b:28,hc:60,cc:72,nc:99},
+  {id:'defReb',   n:'Def. Reb.',   cat:'rebound',b:32,hc:62,cc:74,nc:99},
+  {id:'block',    n:'Block',       cat:'rebound',b:22,hc:52,cc:65,nc:99},
+  {id:'speed',    n:'Speed',       cat:'athlete',b:42,hc:68,cc:76,nc:99},
+  {id:'agility',  n:'Agility',     cat:'athlete',b:40,hc:66,cc:75,nc:99},
+  {id:'strength', n:'Strength',    cat:'athlete',b:30,hc:58,cc:68,nc:99},
+];
+const PB={PG:{ballHandle:8,passAcc:6,speedBall:6,threePoint:4,speed:4},SG:{threePoint:8,midRange:6,drivLayup:4,speed:4,perimDef:4},SF:{drivLayup:6,threePoint:4,perimDef:6,speed:4,midRange:4},PF:{offReb:8,defReb:6,closeShot:6,strength:6,interDef:6},C:{closeShot:10,defReb:10,offReb:8,block:10,strength:10,interDef:8}};
+const AM={scorer:{inside:1.3,range:1.3,handle:1.0,defense:0.8,rebound:0.9,athlete:1.1},playmaker:{inside:0.9,range:1.0,handle:1.5,defense:0.9,rebound:0.8,athlete:1.2},twoway:{inside:1.1,range:1.1,handle:1.0,defense:1.4,rebound:1.0,athlete:1.1},bigman:{inside:1.3,range:0.7,handle:0.8,defense:1.2,rebound:1.5,athlete:1.0}};
+const DRILLS=[
+  {id:'ft',n:'Free Throw Line',d:'Nail your free throws',ps:'freeThrow',ss:'midRange',tp:[4,14],cd:16},
+  {id:'arc',n:'3-Point Factory',d:'Fire from deep',ps:'threePoint',ss:'midRange',tp:[5,16],cd:20},
+  {id:'cone',n:'Cone Dribble',d:'Handles through traffic',ps:'ballHandle',ss:'agility',tp:[3,12],cd:15},
+  {id:'post',n:'Post Work',d:'Dominate the interior',ps:'closeShot',ss:'strength',tp:[4,13],cd:18},
+  {id:'vision',n:'Court Vision',d:'Find the open man',ps:'passAcc',ss:'ballHandle',tp:[3,12],cd:16},
+  {id:'block',n:'Rim Protection',d:'Reject shots at the rim',ps:'block',ss:'interDef',tp:[4,14],cd:20},
+  {id:'sprint',n:'Sprints',d:'Pure speed and conditioning',ps:'speed',ss:'agility',tp:[3,13],cd:16},
+  {id:'ladder',n:'Ladder Drills',d:'Explosive lateral moves',ps:'agility',ss:'speed',tp:[3,12],cd:15},
+  {id:'box',n:'Box Out Battle',d:'Win the rebounding war',ps:'defReb',ss:'strength',tp:[4,13],cd:18},
+  {id:'mid',n:'Pull-Up Jumper',d:'Lethal mid-range game',ps:'midRange',ss:'freeThrow',tp:[3,13],cd:16},
+  {id:'dunk',n:'Dunk Package',d:'Finish with authority',ps:'drivDunk',ss:'drivLayup',tp:[4,14],cd:20},
+  {id:'pdef',n:'Perimeter D',d:'Lock down your man',ps:'perimDef',ss:'steal',tp:[3,12],cd:16},
+];
+const FOCUSES=[
+  {id:'scorer',n:'Scorer',icon:'[S]',cats:['inside','range'],bonus:.28},
+  {id:'playmaker',n:'Playmaker',icon:'[P]',cats:['handle'],bonus:.38},
+  {id:'twoway',n:'Two-Way',icon:'[D]',cats:['defense','athlete'],bonus:.32},
+  {id:'bigman',n:'Big Man',icon:'[B]',cats:['rebound','inside'],bonus:.32},
+];
+const ACH=[
+  {id:'a1',n:'First Bucket',d:'Score your first point',ico:'basketball',chk:g=>g.c.points>=1},
+  {id:'a2',n:'State Champion',d:'Complete High School',ico:'school',chk:g=>g.phase!==PH.HS},
+  {id:'a3',n:'Making the League',d:'Reach the NBA',ico:'clipboard',chk:g=>g.phase===PH.NBA},
+  {id:'a4',n:'5,000 Club',d:'5,000 career points',ico:'star',chk:g=>g.c.points>=5000},
+  {id:'a5',n:'Vision Award',d:'1,000 career assists',ico:'eye',chk:g=>g.c.assists>=1000},
+  {id:'a6',n:'Glass Eater',d:'2,000 career rebounds',ico:'box',chk:g=>g.c.rebounds>=2000},
+  {id:'a7',n:'10,000 Points',d:'10,000 career points',ico:'fire',chk:g=>g.c.points>=10000},
+  {id:'a8',n:'All-Star',d:'Earn an All-Star selection',ico:'star2',chk:g=>g.c.allStars>=1},
+  {id:'a9',n:'Ring Bearer',d:'Win a championship',ico:'ring',chk:g=>g.c.championships>=1},
+  {id:'a10',n:'20,000 Points',d:'20,000 career points',ico:'glow',chk:g=>g.c.points>=20000},
+  {id:'a11',n:'Most Valuable',d:'Win an MVP award',ico:'trophy',chk:g=>g.c.mvps>=1},
+  {id:'a12',n:'30,000 Points',d:'30,000 career points',ico:'diamond',chk:g=>g.c.points>=30000},
+  {id:'a13',n:'Dynasty',d:'Win 3 championships',ico:'crown',chk:g=>g.c.championships>=3},
+  {id:'a14',n:'Superstar',d:'Reach 90 OVR',ico:'lightning',chk:g=>ovr(g)>=90},
+  {id:'a15',n:'99 Overall',d:'Reach the pinnacle',ico:'goat',chk:g=>ovr(g)>=99},
+  {id:'a16',n:'All-Time Scorer',d:"Pass LeBron's career record",ico:'crown2',chk:g=>g.c.points>=38390},
+  {id:'a17',n:'Hall of Fame',d:'HOF Index >= 100',ico:'hall',chk:g=>hof(g)>=100},
+  {id:'a18',n:'Educated Hooper',d:'Complete the college route',ico:'grad',chk:g=>g.tookCollege},
+  {id:'a19',n:'Iron Man',d:'Play 15+ NBA seasons',ico:'arm',chk:g=>g.c.seasons>=15},
+  {id:'a20',n:'Triple-Double Era',d:'Average triple-double for a season',ico:'chart',chk:g=>g.c.tdS>=1},
+];
+const ACH_ICONS={basketball:'🏀',school:'🏫',clipboard:'📋',star:'⭐',eye:'👁',box:'📦',fire:'🔥',star2:'🌟',ring:'💍',glow:'✨',trophy:'🏆',diamond:'💎',crown:'👑',lightning:'⚡',goat:'🐐',crown2:'👑',hall:'🏛',grad:'🎓',arm:'💪',chart:'📈'};
+const BOOSTS=[
+  {id:'b1',n:'Shooting Coach',d:'+15% TP from shooting drills',ico:'🎯',cost:150,max:3},
+  {id:'b2',n:'Defense Trainer',d:'+15% TP from defense drills',ico:'🛡',cost:150,max:3},
+  {id:'b3',n:'Personal Trainer',d:'+20% passive TP per hour',ico:'💪',cost:400,max:3},
+  {id:'b4',n:'Nutritionist',d:'Stamina drains 35% slower',ico:'🥗',cost:300,max:2},
+  {id:'b5',n:'Offline Bank+',d:'+3hr max offline TP storage',ico:'⏱',cost:500,max:3},
+  {id:'b6',n:'Elite Coach',d:'+10% faster phase progress',ico:'📈',cost:600,max:2},
+];
+
+let G=null;
+
+function newG(name,pos,arch){
+  const stats={};
+  STATS.forEach(s=>{const pb=(PB[pos]||{})[s.id]||0;stats[s.id]=Math.min(s.hc,s.b+pb);});
+  return{name,pos,arch,phase:PH.HS,tookCollege:false,tp:30,intensity:'moderate',focus:'scorer',
+    stamina:100,stats,cds:{},bought:{},unlocked:[],
+    c:{points:0,assists:0,rebounds:0,steals:0,blocks:0,seasons:0,allStars:0,championships:0,mvps:0,dpoYs:0,tdS:0},
+    hist:[],log:[],pp:0,lastTick:Date.now(),lastSave:Date.now()};
+}
+
+function ovr(g){
+  const cats={inside:0,range:0,handle:0,defense:0,rebound:0,athlete:0};
+  const cnts={inside:0,range:0,handle:0,defense:0,rebound:0,athlete:0};
+  STATS.forEach(s=>{cats[s.cat]+=(g.stats[s.id]||0);cnts[s.cat]++;});
+  Object.keys(cats).forEach(k=>cats[k]/=(cnts[k]||1));
+  const W={PG:{inside:.18,range:.20,handle:.25,defense:.15,rebound:.08,athlete:.14},SG:{inside:.20,range:.25,handle:.18,defense:.15,rebound:.08,athlete:.14},SF:{inside:.22,range:.18,handle:.15,defense:.18,rebound:.12,athlete:.15},PF:{inside:.25,range:.12,handle:.10,defense:.18,rebound:.20,athlete:.15},C:{inside:.28,range:.08,handle:.08,defense:.20,rebound:.22,athlete:.14}};
+  const w=W[g.pos]||W.SF;
+  let o=0;Object.keys(cats).forEach(k=>o+=cats[k]*w[k]);
+  return Math.round(Math.max(20,Math.min(99,o)));
+}
+function smax(s,phase){return phase===PH.HS?s.hc:phase===PH.COL?s.cc:s.nc;}
+function hof(g){const c=g.c;let i=0;i+=c.points/500;i+=c.assists/100;i+=c.rebounds/150;i+=c.allStars*4;i+=c.championships*12;i+=c.mvps*10;i+=c.dpoYs*8;if(g.tookCollege)i+=5;i+=Math.floor(c.seasons/5)*2;return Math.round(i);}
+function idleR(g){const im={rest:.5,moderate:1,intense:1.75,max:2.5};const pb={hs:14,college:20,nba:30};let b=pb[g.phase]||14;let m=im[g.intensity]||1;let bm=1+((g.bought['b3']||0)*.20);return b*m*bm;}
+function stamDrainPerMin(g){const d={rest:-.7,moderate:.16,intense:.4,max:1.0};let dr=d[g.intensity]||.16;dr*=(1-(g.bought['b4']||0)*.35);return Math.max(0,dr);}
+function dimR(v){if(v<=60)return 1.0;if(v<=75)return 0.75;if(v<=88)return 0.50;if(v<=95)return 0.25;return 0.1;}
+function phaseR(g){const b={hs:0.028,college:0.042,nba:0};let r=b[g.phase]||0;r*=(1+(g.bought['b6']||0)*.10);return r;}
+
+function tick(g,secs){
+  const maxBank=3600*(12+(g.bought['b5']||0)*3);
+  const s=Math.min(secs,maxBank);
+  const tpGain=(idleR(g)/3600)*s;
+  g.tp+=tpGain;
+  g.stamina=Math.max(0,Math.min(100,g.stamina-(stamDrainPerMin(g)/60)*s));
+  if(g.phase!==PH.NBA) g.pp=Math.min(100,g.pp+phaseR(g)*s);
+  autoSpend(g,tpGain);
+}
+
+function autoSpend(g,earned){
+  const toSpend=earned*0.65;
+  if(toSpend<0.3)return;
+  const f=FOCUSES.find(x=>x.id===g.focus);
+  const cats=f?f.cats:['inside','range'];
+  const below=STATS.filter(s=>cats.includes(s.cat)&&(g.stats[s.id]||0)<smax(s,g.phase));
+  if(!below.length)return;
+  const per=toSpend/below.length;
+  const arch=AM[g.arch]||AM.scorer;
+  below.forEach(s=>{
+    const cap=smax(s,g.phase);const cur=g.stats[s.id]||0;
+    const gain=(per/18)*dimR(cur)*(arch[s.cat]||1);
+    g.stats[s.id]=Math.min(cap,cur+gain);
+  });
+  g.tp=Math.max(0,g.tp-toSpend*0.35);
+}
+
+function doDrill(id){
+  const d=DRILLS.find(x=>x.id===id);if(!d)return;
+  const now=Date.now();if(now<(G.cds[id]||0))return;
+  let[mn,mx]=d.tp;let gain=Math.round(mn+Math.random()*(mx-mn));
+  const ps=STATS.find(s=>s.id===d.ps);const arch=AM[G.arch]||AM.scorer;
+  gain=Math.round(gain*(arch[ps?.cat]||1));
+  if((G.bought['b1']||0)>0&&['range'].includes(ps?.cat))gain=Math.round(gain*(1+(G.bought['b1']||0)*.15));
+  if((G.bought['b2']||0)>0&&['defense'].includes(ps?.cat))gain=Math.round(gain*(1+(G.bought['b2']||0)*.15));
+  G.tp+=gain;
+  if(ps){const cap=smax(ps,G.phase);const cur=G.stats[ps.id]||0;G.stats[ps.id]=Math.min(cap,cur+0.22*dimR(cur));}
+  const ss=STATS.find(s=>s.id===d.ss);if(ss){const cap=smax(ss,G.phase);G.stats[ss.id]=Math.min(cap,(G.stats[ss.id]||0)+0.06*dimR(G.stats[ss.id]||0));}
+  if(G.phase!==PH.NBA)G.pp=Math.min(100,G.pp+0.8);
+  G.cds[id]=now+d.cd*1000;
+  showFloat('+'+gain+' TP');
+  checkAch();
+  renderDrills();renderPhaseBar();
+}
+
+function simulateSeason(){
+  if(G.phase!==PH.NBA)return;
+  const o=ovr(G);
+  function sim(lo,hi,v=.12){const t=Math.max(0,Math.min(1,(o-75)/24));return Math.max(0,+(lo+(hi-lo)*t*(1+(Math.random()-.5)*v)).toFixed(1));}
+  let ppg,rpg,apg,spg,bpg,fg,tp3;
+  if(o>=99){ppg=sim(35,45);rpg=sim(9,15);apg=sim(7,13);spg=sim(1.8,3.0);bpg=sim(2.0,4.0);fg=sim(52,58);tp3=sim(40,45)}
+  else if(o>=95){ppg=sim(28,37);rpg=sim(7,13);apg=sim(6,11);spg=sim(1.6,2.4);bpg=sim(1.3,2.8);fg=sim(50,55);tp3=sim(38,42)}
+  else if(o>=90){ppg=sim(23,30);rpg=sim(6,11);apg=sim(5,9);spg=sim(1.2,2.0);bpg=sim(1.0,2.0);fg=sim(48,52);tp3=sim(36,40)}
+  else if(o>=85){ppg=sim(18,24);rpg=sim(5,9);apg=sim(4,8);spg=sim(1.0,1.7);bpg=sim(0.7,1.5);fg=sim(46,50);tp3=sim(35,38)}
+  else if(o>=80){ppg=sim(13,19);rpg=sim(4,7);apg=sim(3,6);spg=sim(0.7,1.3);bpg=sim(0.5,1.0);fg=sim(44,47);tp3=sim(32,36)}
+  else{ppg=sim(8,13);rpg=sim(3,5);apg=sim(2,4);spg=sim(0.5,0.9);bpg=sim(0.3,0.6);fg=sim(42,45);tp3=sim(28,33)}
+  const gp=72+Math.floor(Math.random()*10);
+  G.c.points+=Math.round(ppg*gp);G.c.assists+=Math.round(apg*gp);G.c.rebounds+=Math.round(rpg*gp);G.c.steals+=Math.round(spg*gp);G.c.blocks+=Math.round(bpg*gp);G.c.seasons++;
+  const awards=[];
+  if(o>=88&&ppg>=18){G.c.allStars++;awards.push('All-Star');}
+  if(o>=93&&ppg>=26&&Math.random()<.3){G.c.mvps++;awards.push('MVP');}
+  if(G.stats.perimDef>=88&&G.stats.steal>=80&&Math.random()<.25){G.c.dpoYs++;awards.push('DPOY');}
+  const cp=Math.max(0,(o-78)/21)*.45;if(Math.random()<cp){G.c.championships++;awards.push('Champion');}
+  if(ppg>=20&&rpg>=10&&apg>=10){G.c.tdS++;awards.push('Triple-Double Season');}
+  const rtp=Math.round(o*4+ppg*2);G.tp+=rtp;
+  G.hist.unshift({yr:2024+G.c.seasons,ppg,rpg,apg,spg,bpg,fg:+fg.toFixed(1),tp3:+tp3.toFixed(1),gp,ovr:o,awards});
+  if(G.hist.length>15)G.hist.pop();
+  addLog('Season '+G.c.seasons+': '+ppg+'PPG '+rpg+'RPG '+apg+'APG',awards.length?'i':'');
+  if(awards.length){addLog('Awards: '+awards.join(', '),'a');showNotif('Awards: '+awards.join(' | '),'Season Complete','na');}
+  showNotif('Season Done! +'+rtp+' TP',ppg+' PPG | '+rpg+' RPG | '+apg+' APG','nl');
+  checkAch();renderAll();saveGame(true);
+}
+
+function checkPhase(){
+  if(G.phase!==PH.NBA&&G.pp>=100){
+    if(G.phase===PH.HS)openDecision();
+    else if(G.phase===PH.COL)enterNBA();
+  }
+}
+
+function openDecision(){
+  const o=ovr(G);
+  document.getElementById('dec-narr').textContent=G.name+', you have a '+o+' OVR rating. Scouts are watching. Go pro now, or take a year of college for bigger long-term gains?';
+  const dr=o>=73?'1st Round':'2nd Round';
+  document.getElementById('dnba-pros').innerHTML=['Draft: '+dr+' pick','Earlier access to 99 stats','More career seasons for stats','Comp: LeBron, KG, Kobe'].map(x=>'<li>'+x+'</li>').join('');
+  document.getElementById('dcol-pros').innerHTML=['+4 to all stat caps','Lottery spot guaranteed','Educated Hooper achievement','+5 HOF Index bonus','Comp: Duncan, Steph, Kawhi'].map(x=>'<li>'+x+'</li>').join('');
+  showScreen('decision-screen');
+}
+
+function decide(choice){
+  if(choice==='college'){
+    G.tookCollege=true;G.phase=PH.COL;G.pp=0;
+    STATS.forEach(s=>{s.cc=Math.min(99,s.cc+4);});
+    addLog('Chose College Route - all stat caps +4!','i');
+    showNotif('Welcome to College!','Stat caps boosted. One year to develop.','nl');
+  }else{
+    G.phase=PH.NBA;G.pp=0;
+    addLog('Entered NBA Draft!','i');
+    showNotif('NBA Draft Night!','Your pro career begins now.','na');
+  }
+  checkAch();showScreen('game-ui');renderAll();saveGame(true);
+}
+
+function advancePhase(){if(G.pp>=100){if(G.phase===PH.HS)openDecision();else if(G.phase===PH.COL)enterNBA();}}
+
+function enterNBA(){
+  G.phase=PH.NBA;G.pp=0;
+  addLog('College complete - entered NBA!','i');
+  showNotif('NBA Draft Day!','College paid off. Go prove yourself.','na');
+  checkAch();renderAll();saveGame(true);
+}
+
+function checkAch(){
+  let changed=false;
+  ACH.forEach(a=>{if(!G.unlocked.includes(a.id)&&a.chk(G)){G.unlocked.push(a.id);showNotif((ACH_ICONS[a.ico]||'?')+' '+a.n,a.d,'na');addLog('Achievement: '+a.n,'a');changed=true;}});
+  if(changed)renderGoals();
+}
+
+function buyBoost(id){
+  const d=BOOSTS.find(b=>b.id===id);if(!d)return;
+  const h=G.bought[id]||0;
+  if(h>=d.max||G.tp<d.cost){showNotif('Not enough TP','Need '+d.cost+' TP','');return;}
+  G.tp-=d.cost;G.bought[id]=(h+1);
+  showNotif(d.ico+' '+d.n,d.d,'nl');addLog('Purchased: '+d.n,'i');
+  renderBoosts();renderHeader();saveGame(true);
+}
+
+function saveGame(silent=false){
+  try{G.lastSave=Date.now();localStorage.setItem(SK,JSON.stringify(G));
+    if(!silent){showNotif('Saved',new Date().toLocaleTimeString(),'');document.getElementById('save-info').textContent='Saved: '+new Date().toLocaleTimeString();}}
+  catch(e){console.error(e);}
+}
+function doLoad(){
+  try{const raw=localStorage.getItem(SK);if(!raw)return;G=JSON.parse(raw);
+    const now=Date.now();const el=(now-(G.lastTick||now))/1000;
+    if(el>5){tick(G,el);const tpG=Math.round((idleR(G)/3600)*Math.min(el,43200));if(tpG>2)showNotif('Welcome back!','+'+tpG+' TP while away','nl');}
+    G.lastTick=now;showScreen('game-ui');renderAll();startLoop();}
+  catch(e){console.error(e);}
+}
+function confirmReset(){showModal('New Career?','All progress lost permanently.',[{t:'Cancel',fn:'closeModal()'},{t:'Reset',fn:'localStorage.removeItem("'+SK+'");location.reload()',cls:'org'}]);}
+function exportSave(){const d=localStorage.getItem(SK);if(!d)return;const a=document.createElement('a');a.href='data:application/json,'+encodeURIComponent(d);a.download='hw.json';a.click();}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showTab(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));document.getElementById('panel-'+id).classList.add('on');document.getElementById('tb-'+id).classList.add('on');}
+function showNotif(title,msg,cls){const el=document.createElement('div');el.className='notif'+(cls?' '+cls:'');el.innerHTML='<div class="nt">'+title+'</div><div>'+msg+'</div>';document.getElementById('nc').appendChild(el);setTimeout(()=>el.remove(),3100);}
+function showFloat(t){const el=document.createElement('div');el.className='fp';el.textContent=t;el.style.left=(20+Math.random()*60)+'vw';el.style.top=(35+Math.random()*25)+'vh';document.body.appendChild(el);setTimeout(()=>el.remove(),900);}
+function showModal(title,body,btns){document.getElementById('m-title').textContent=title;document.getElementById('m-body').innerHTML=body;document.getElementById('m-btns').innerHTML=btns.map(b=>'<button class="btn '+( b.cls||'')+'" onclick="'+b.fn+'">'+b.t+'</button>').join('');document.getElementById('modal').style.display='flex';}
+function closeModal(){document.getElementById('modal').style.display='none';}
+function addLog(msg,type){const t=new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});G.log.unshift({t,msg,type});if(G.log.length>40)G.log.pop();}
+function setInt(v){G.intensity=v;renderTrain();saveGame(true);}
+function setFocus(v){G.focus=v;renderTrain();saveGame(true);}
+
+function renderAll(){renderHeader();renderPhaseBar();renderTrain();renderDrills();renderStats();renderCareer();renderGoals();renderMore();}
+
+function renderHeader(){
+  const o=ovr(G);
+  document.getElementById('hdr-tp').textContent=Math.floor(G.tp);
+  document.getElementById('hdr-ovr').textContent=o;
+  document.getElementById('hdr-name').textContent=G.name;
+  const pn={hs:'HIGH SCHOOL',college:'COLLEGE',nba:'NBA'};
+  document.getElementById('hdr-phase').textContent=pn[G.phase]||'';
+}
+
+function renderPhaseBar(){
+  const fill=document.getElementById('pb-fill');const lbl=document.getElementById('pb-lbl');const pct=document.getElementById('pb-pct');const btn=document.getElementById('pb-btn');
+  if(G.phase===PH.NBA){lbl.textContent='NBA Career';pct.textContent=G.c.seasons+' seasons';fill.style.width='100%';btn.style.display='none';return;}
+  const p=Math.min(100,G.pp);
+  fill.style.width=p+'%';pct.textContent=Math.round(p)+'%';
+  lbl.textContent=G.phase===PH.HS?'HS Progress':'College Year';
+  btn.style.display=p>=100?'':'none';
+  if(p>=100)btn.textContent=G.phase===PH.HS?'DRAFT DAY >':'ENTER NBA >';
+}
+
+function renderTrain(){
+  const s=G.stamina;
+  document.getElementById('stam-txt').textContent=Math.round(s)+'%';
+  const sf=document.getElementById('stam-fill');sf.style.width=s+'%';
+  sf.style.background=s>60?'linear-gradient(90deg,var(--green),var(--green2))':s>25?'linear-gradient(90deg,var(--gold),var(--gold2))':'linear-gradient(90deg,var(--orange),var(--red))';
+  document.getElementById('tp-rate').textContent=idleR(G).toFixed(1);
+  const im2={rest:'ir',moderate:'im2',intense:'ii',max:'ix'};
+  ['rest','moderate','intense','max'].forEach(k=>{const b=document.getElementById('ib-'+k);b.className='ib'+(G.intensity===k?' '+im2[k]:'');});
+  const w=document.getElementById('int-warn');
+  if(G.intensity==='max'){w.style.display='';w.textContent='Warning: Max intensity drains stamina fast. Use Rest after.';}
+  else if(s<15){w.style.display='';w.textContent='Low stamina! Switch to Rest to recover.';}
+  else w.style.display='none';
+  document.getElementById('focus-btns').innerHTML=FOCUSES.map(f=>'<button class="btn'+(G.focus===f.id?' gold':'')+'" onclick="setFocus(\''+f.id+'\')" style="padding:7px;text-align:left;font-size:10px">'+f.icon+' '+f.n+'<span style="display:block;font-size:9px;opacity:.7;margin-top:2px">+'+Math.round(f.bonus*100)+'% TP</span></button>').join('');
+}
+
+function renderDrills(){
+  const now=Date.now();const lim=G.phase===PH.HS?8:G.phase===PH.COL?10:12;
+  document.getElementById('drills').innerHTML=DRILLS.slice(0,lim).map(d=>{
+    const cdL=Math.max(0,(G.cds[d.id]||0)-now);const cool=cdL>0;const pct=cool?(cdL/(d.cd*1000)*100):100;
+    const[mn,mx]=d.tp;
+    return'<div class="db'+(cool?' cool':'')+'" onclick="doDrill(\''+d.id+'\')">'+'<div class="dcd" style="width:'+(cool?pct:100)+'%"></div>'+'<div class="dn">'+d.n+'</div>'+'<div class="dd">'+d.d+'</div>'+'<div class="dr">'+(cool?'CD: '+(cdL/1000).toFixed(1)+'s':'+'+mn+'-'+mx+' TP')+'</div></div>';
+  }).join('');
+}
+
+function barT(v){if(v>=95)return't5';if(v>=88)return't4';if(v>=75)return't3';if(v>=60)return't2';return't1';}
+
+function rSG(eid,cat){
+  const el=document.getElementById(eid);
+  el.innerHTML=STATS.filter(s=>s.cat===cat).map(s=>{
+    const v=G.stats[s.id]||0,cap=smax(s,G.phase);const cost=upgC(v);const afford=G.tp>=cost,atCap=v>=cap;
+    return'<div class="sr"><div class="sl">'+s.n+'</div><div class="sbw"><div class="sbf '+barT(v)+'" style="width:'+(v/99*100)+'%"></div></div><div class="sv">'+Math.floor(v)+'</div><div class="sc">/'+cap+'</div><button class="btn sm" style="padding:4px 8px;font-size:9px;margin-left:4px" onclick="manUpg(\''+s.id+'\')" '+(atCap||!afford?'disabled':'')+'>'+(atCap?'MAX':cost+' TP')+'</button></div>';
+  }).join('');
+}
+
+function renderStats(){
+  const o=ovr(G);
+  document.getElementById('st-ovr').textContent=o;document.getElementById('st-name').textContent=G.name;document.getElementById('st-pa').textContent=G.pos+' - '+G.arch;
+  const t=ovrT(o);document.getElementById('st-badges').innerHTML='<span class="ribbon '+t.cls+'">'+t.lbl+'</span>';
+  ['inside','range','handle','defense','rebound','athlete'].forEach(c=>rSG('sb-'+c,c));
+}
+
+function manUpg(sid){
+  const def=STATS.find(s=>s.id===sid);if(!def)return;
+  const cost=upgC(G.stats[sid]||0);if(G.tp<cost)return;
+  const cap=smax(def,G.phase);const cur=G.stats[sid]||0;if(cur>=cap)return;
+  G.tp-=cost;const gain=(1.2+Math.random()*.8)*dimR(cur);
+  G.stats[sid]=Math.min(cap,cur+gain);showFloat('+'+gain.toFixed(1)+' '+def.n);
+  checkAch();renderStats();renderHeader();
+}
+
+function upgC(v){if(v<60)return 4;if(v<70)return 12;if(v<80)return 35;if(v<88)return 90;if(v<95)return 250;return 700;}
+function ovrT(o){if(o>=99)return{lbl:'GOAT',cls:'rr'};if(o>=95)return{lbl:'SUPERSTAR',cls:'rr'};if(o>=90)return{lbl:'ALL-STAR',cls:'ro'};if(o>=85)return{lbl:'STARTER',cls:'ro'};if(o>=80)return{lbl:'ROLE PLAYER',cls:'rg'};if(o>=70)return{lbl:'PROSPECT',cls:'rg'};return{lbl:'DEVELOPING',cls:''};}
+
+function renderCareer(){
+  const c=G.c,o=ovr(G);
+  const pb=document.getElementById('career-phase-box');
+  if(G.phase!==PH.NBA){pb.style.display='block';const p=Math.round(G.pp);pb.innerHTML='<div class="ht">'+(G.phase===PH.HS?'HIGH SCHOOL':'COLLEGE')+' PHASE</div>Progress: <strong>'+p+'%</strong> — Tap drills and train to advance the phase bar!<div style="height:5px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:6px;overflow:hidden"><div style="height:100%;width:'+p+'%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px"></div></div>';}
+  else pb.style.display='none';
+  document.getElementById('career-grid').innerHTML=[{v:Math.round(c.points).toLocaleString(),l:'Career Pts',hi:c.points>=10000},{v:Math.round(c.assists).toLocaleString(),l:'Assists',hi:false},{v:Math.round(c.rebounds).toLocaleString(),l:'Rebounds',hi:false},{v:c.seasons,l:'Seasons',hi:false},{v:c.allStars+'x',l:'All-Stars',hi:c.allStars>=1},{v:c.championships+'x',l:'Rings',hi:c.championships>=1},{v:c.mvps+'x',l:'MVPs',hi:c.mvps>=1},{v:hof(G),l:'HOF Idx',hi:hof(G)>=100}].map(s=>'<div class="cs3"><div class="csv'+(s.hi?' hi':'')+'">'+s.v+'</div><div class="csl">'+s.l+'</div></div>').join('');
+  const nc=document.getElementById('nba-card');
+  if(G.phase===PH.NBA){nc.style.display='block';document.getElementById('nba-mini').innerHTML=[{v:c.seasons,l:'Seasons'},{v:o,l:'OVR'},{v:hof(G),l:'HOF Idx'}].map(s=>'<div class="ms2"><div class="msv">'+s.v+'</div><div class="msl">'+s.l+'</div></div>').join('');document.getElementById('sim-btn').disabled=G.stamina<5;}
+  else nc.style.display='none';
+  const h=Math.min(150,hof(G));document.getElementById('hof-bar').style.width=Math.min(100,h)+'%';document.getElementById('hof-lbl').textContent='HOF: '+h+(h>=100?' - INDUCTED':'/ 100');
+  document.getElementById('hof-break').textContent='Pts:+'+(Math.floor(c.points/500))+' Ast:+'+(Math.floor(c.assists/100))+' Reb:+'+(Math.floor(c.rebounds/150))+' AllStar:+'+(c.allStars*4)+' Rings:+'+(c.championships*12)+' MVP:+'+(c.mvps*10);
+  const sh=document.getElementById('season-hist');
+  if(!G.hist.length)sh.innerHTML='<div style="font-size:11px;color:var(--chalk3);text-align:center;padding:12px">No seasons yet - go to Career tab and tap Simulate Season!</div>';
+  else sh.innerHTML=G.hist.slice(0,8).map(s=>'<div class="sc2"><div class="sh2"><div class="sy">'+s.yr+' - OVR '+s.ovr+'</div>'+(s.awards.length?'<div class="saw">'+s.awards[0]+'</div>':'')+'</div><div class="ss"><span class="sv2"><strong>'+s.ppg+'</strong> PPG</span><span class="sv2"><strong>'+s.rpg+'</strong> RPG</span><span class="sv2"><strong>'+s.apg+'</strong> APG</span><span class="sv2"><strong>'+s.fg+'%</strong> FG</span></div></div>').join('');
+}
+
+function renderGoals(){
+  const done=G.unlocked.length,total=ACH.length;
+  document.getElementById('goal-sum').innerHTML=[{v:done,l:'Unlocked'},{v:total-done,l:'Remaining'},{v:Math.round(done/total*100)+'%',l:'Done'}].map(s=>'<div class="ms2"><div class="msv">'+s.v+'</div><div class="msl">'+s.l+'</div></div>').join('');
+  document.getElementById('goal-list').innerHTML=ACH.map(a=>{const on=G.unlocked.includes(a.id);return'<div class="ai'+(on?' on':' off')+'"><div class="aico">'+(ACH_ICONS[a.ico]||'?')+'</div><div class="ainfo"><div class="an">'+a.n+'</div><div class="ad">'+a.d+'</div></div>'+(on?'<div class="abg">DONE</div>':'')+'</div>';}).join('');
+}
+
+function renderMore(){renderBoosts();const logEl=document.getElementById('act-log');logEl.innerHTML=(G.log||[]).slice(0,25).map(e=>'<div class="le'+(e.type==='i'?' li':e.type==='a'?' la':'')+'"><span class="lt">'+e.t+'</span><span class="lm">'+e.msg+'</span></div>').join('');document.getElementById('save-info').textContent='Last saved: '+new Date(G.lastSave).toLocaleTimeString();}
+function renderBoosts(){document.getElementById('boost-list').innerHTML=BOOSTS.map(b=>{const h=G.bought[b.id]||0,max=h>=b.max,afford=G.tp>=b.cost;return'<div class="bi"><div class="bico">'+b.ico+'</div><div class="binfo"><div class="bn">'+b.n+(h?' ('+h+'/'+b.max+')':'')+'</div><div class="bd">'+b.d+'</div></div><div style="text-align:right"><div class="bprice">'+b.cost+' TP</div><button class="btn sm'+(afford&&!max?' grn':'')+'" onclick="buyBoost(\''+b.id+'\')" '+(max||!afford?'disabled':'')+'>'+(max?'MAX':'BUY')+'</button></div></div>';}).join('');}
+
+// ── GOD MODE ─────────────────────────────────────────────
+function gmLog(msg){
+  const el=document.getElementById('gm-log');
+  if(el){el.textContent='⚡ '+msg;setTimeout(()=>{if(el.textContent==='⚡ '+msg)el.textContent='';},2500);}
+}
+
+function gmMaxStats(){
+  STATS.forEach(s=>{G.stats[s.id]=99;s.hc=99;s.cc=99;s.nc=99;});
+  G.stamina=100;
+  checkAch();renderAll();saveGame(true);
+  gmLog('All stats maxed to 99!');showNotif('🔥 GOD MODE','Every stat set to 99','na');
+}
+
+function gmInfiniteTP(){
+  G.tp+=999999;
+  renderHeader();renderMore();saveGame(true);
+  gmLog('+999,999 TP added!');showNotif('💰 GOD MODE','+999,999 Training Points','nl');
+}
+
+function gmSkipToNBA(){
+  G.phase=PH.NBA;G.pp=100;G.stamina=100;
+  // Bump stats to a solid baseline if still low
+  STATS.forEach(s=>{if((G.stats[s.id]||0)<75)G.stats[s.id]=75;});
+  checkAch();renderAll();saveGame(true);
+  gmLog('Skipped straight to the NBA!');showNotif('🏀 GOD MODE','Welcome to the NBA — skipped HS & college','na');
+}
+
+function gmMaxStamina(){
+  G.stamina=100;G.intensity='moderate';
+  renderTrain();saveGame(true);
+  gmLog('Stamina fully restored!');showNotif('⚡ GOD MODE','Stamina 100% — fresh legs','nl');
+}
+
+function gmWinChampionship(){
+  G.c.championships++;G.c.allStars+=1;G.c.mvps+=1;G.c.seasons+=1;
+  G.c.points+=Math.round(28*80);G.c.assists+=Math.round(7*80);G.c.rebounds+=Math.round(8*80);
+  G.c.steals+=Math.round(1.5*80);G.c.blocks+=Math.round(1.2*80);
+  G.hist.unshift({yr:2024+G.c.seasons,ppg:28,rpg:8,apg:7,spg:1.5,bpg:1.2,fg:52.0,tp3:38.5,gp:80,ovr:ovr(G),awards:['Champion','MVP','All-Star']});
+  G.tp+=5000;
+  checkAch();renderAll();saveGame(true);
+  gmLog('Ring secured! MVP + All-Star added.');showNotif('💍 GOD MODE','Championship won! +MVP +All-Star +5000 TP','na');
+}
+
+function gmBlastCareer(){
+  // Simulate 10 peak seasons silently
+  for(let i=0;i<10;i++){
+    const gp=80;const ppg=28+Math.random()*10;const rpg=7+Math.random()*6;const apg=6+Math.random()*6;
+    G.c.points+=Math.round(ppg*gp);G.c.assists+=Math.round(apg*gp);G.c.rebounds+=Math.round(rpg*gp);
+    G.c.steals+=Math.round(1.8*gp);G.c.blocks+=Math.round(1.4*gp);
+    G.c.seasons++;G.c.allStars++;
+    if(Math.random()>0.6)G.c.championships++;
+    if(Math.random()>0.7)G.c.mvps++;
+    G.hist.unshift({yr:2024+G.c.seasons,ppg:+ppg.toFixed(1),rpg:+rpg.toFixed(1),apg:+apg.toFixed(1),spg:1.8,bpg:1.4,fg:52.0,tp3:39.0,gp,ovr:ovr(G),awards:G.c.mvps?['MVP','All-Star']:['All-Star']});
+  }
+  G.tp+=20000;G.stamina=100;
+  checkAch();renderAll();saveGame(true);
+  gmLog('+10 peak seasons blasted!');showNotif('🚀 GOD MODE','+10 seasons · +20,000 TP · career totals updated','nl');
+}
+
+function gmUnlockAll(){
+  ACH.forEach(a=>{if(!G.unlocked.includes(a.id))G.unlocked.push(a.id);});
+  // Also push stats and phase to satisfy checks
+  G.phase=PH.NBA;G.tookCollege=true;
+  STATS.forEach(s=>{G.stats[s.id]=99;});
+  renderAll();saveGame(true);
+  gmLog('All achievements unlocked!');showNotif('⭐ GOD MODE','Every achievement unlocked — GOAT status','na');
+}
+
+function gmMaxBoosts(){
+  BOOSTS.forEach(b=>{G.bought[b.id]=b.max;});
+  renderAll();saveGame(true);
+  gmLog('All boosts maxed!');showNotif('📈 GOD MODE','Every boost upgrade maxed out','nl');
+}
+
+let loopId=null;
+let ffActive=false;
+let ffId=null;
+
+// Fast-forward: simulates 30 seconds of game time per real second,
+// fires all available drills automatically, and auto-simulates NBA seasons.
+function toggleFastForward(){
+  ffActive=!ffActive;
+  const btn=document.getElementById('ff-btn');
+  if(ffActive){
+    btn.textContent='⏹ STOP';btn.classList.add('active');
+    showNotif('⏩ Fast Forward ON','Auto-playing at 30x speed — tap again to stop','nl');
+    ffId=setInterval(ffTick,200); // runs every 200ms
+  } else {
+    btn.textContent='⏩ FF';btn.classList.remove('active');
+    if(ffId){clearInterval(ffId);ffId=null;}
+    showNotif('⏹ Fast Forward OFF','Returning to normal speed','');
+  }
+}
+
+function ffTick(){
+  if(!G) return;
+  // Simulate 6 real seconds of game time per 200ms call (30x speed)
+  tick(G, 6);
+
+  // Auto-fire every available drill
+  const now=Date.now();
+  DRILLS.forEach(d=>{
+    if(now>=(G.cds[d.id]||0)){
+      // Fire drill silently (no float animation in FF mode)
+      let[mn,mx]=d.tp;let gain=Math.round(mn+Math.random()*(mx-mn));
+      const ps=STATS.find(s=>s.id===d.ps);const arch=AM[G.arch]||AM.scorer;
+      gain=Math.round(gain*(arch[ps?.cat]||1));
+      G.tp+=gain;
+      if(ps){const cap=smax(ps,G.phase);const cur=G.stats[ps.id]||0;G.stats[ps.id]=Math.min(cap,cur+0.22*dimR(cur));}
+      const ss=STATS.find(s=>s.id===d.ss);if(ss){const cap=smax(ss,G.phase);G.stats[ss.id]=Math.min(cap,(G.stats[ss.id]||0)+0.06*dimR(G.stats[ss.id]||0));}
+      if(G.phase!==PH.NBA)G.pp=Math.min(100,G.pp+0.8);
+      G.cds[d.id]=now+d.cd*1000;
+    }
+  });
+
+  // Auto-simulate NBA seasons if in NBA phase and enough stamina
+  if(G.phase===PH.NBA && G.stamina>=20 && Math.random()<0.05){
+    simulateSeason();
+  }
+
+  checkPhase();checkAch();
+}
+
+function startLoop(){
+  if(loopId)clearInterval(loopId);
+  loopId=setInterval(()=>{
+    const now=Date.now();const el=(now-(G.lastTick||now))/1000;G.lastTick=now;
+    if(el>0&&!ffActive)tick(G,el); // normal tick only when not in FF mode
+    checkPhase();checkAch();
+    renderHeader();renderPhaseBar();
+    const hasCd=Object.values(G.cds).some(c=>c>now-2000);if(hasCd||ffActive)renderDrills();
+    G._tc=(G._tc||0)+1;
+    if(G._tc%3===0)renderTrain();
+    if(G._tc%4===0)renderStats();
+    if(G._tc%8===0)renderCareer();
+    if(G._tc%30===0){saveGame(true);document.getElementById('save-info').textContent='Auto-saved: '+new Date().toLocaleTimeString();}
+  },1000);
+}
+
+function startGame(){
+  const name=document.getElementById('inp-name').value.trim()||'Player';
+  const pos=document.getElementById('inp-pos').value;const arch=document.getElementById('inp-arch').value;
+  G=newG(name,pos,arch);G.lastTick=Date.now();
+  addLog('Career started: '+name+' - '+pos+' - '+arch,'i');
+  showNotif('Welcome, '+name+'!',pos+' - '+arch+' - High School Phase','nl');
+  showScreen('game-ui');renderAll();startLoop();saveGame(true);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{if(localStorage.getItem(SK))document.getElementById('load-wrap').style.display='block';});
+window.addEventListener('beforeunload',()=>{if(G)saveGame(true);});
+document.addEventListener('touchend',e=>{if(e.target.closest('.db'))e.preventDefault();},{passive:false});
+</script>
+</body>
+</html>
